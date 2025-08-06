@@ -1,0 +1,109 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/rust
+// https://containers.dev/implementors/json_schema/#base-schema
+// https://containers.dev/implementors/json_reference/
+// https://github.com/devcontainers/spec/blob/main/docs/specs/devcontainer-features.md
+// https://hub.docker.com/r/microsoft/devcontainers
+{
+  "name": "NASA_CMR_AI_Agent",
+  "hostRequirements": {
+    "cpus": 1,
+    "gpu": "optional",
+    "storage": "10gb"
+  },
+  "dockerComposeFile": "./docker-compose.yml",
+  "shutdownAction": "stopCompose",
+  "service": "ubuntu",
+  "workspaceFolder": "/home/vscode",
+  "workspaceFolders": [
+    {
+      "path": "./development",
+      "name": "development"
+    }
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode,type=bind,consistency=cached",
+  "runArgs": [
+    "--log-level",
+    "debug"
+  ],
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/development",
+  "features": {
+    "./features/debian/debian_base_packages": {},
+    "./features/debian/hardware/nvidia-cuda": {
+      "installCudaDev": true,
+      "installCudnn": true,
+      "installCudnnDev": true,
+      "installNvtx": true,
+      "cudaVersion": "12.9",
+      "cudnnVersion": "automatic"
+    },
+    "./features/debian/programming_languages/python": {},
+    // "./features/mounts/api_keys": {},
+    // "./features/mounts/ssh": {},
+    "./features/mounts/development_folder": {},
+    "./features/environment": {
+      // Moved this to last so the permissions would be updated after everything else
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "christian-kohler.npm-intellisense",
+        "christian-kohler.path-intellisense",
+        "codeium.codeium",
+        "copilot-arena.copilot-arena",
+        "davidanson.vscode-markdownlint",
+        "dotjoshjohnson.xml",
+        "eamodio.gitlens",
+        "foxundermoon.shell-format",
+        "humao.rest-client",
+        "mechatroner.rainbow-csv",
+        "mikestead.dotenv",
+        "ms-vscode.makefile-tools",
+        "rogalmic.bash-debug",
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml",
+        "visualstudioexptteam.vscodeintellicode"
+      ],
+      "settings": {
+        // Markdown Settings
+        "[markdown]": {
+          "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+        },
+        // LM Arena Settings
+        "arena.codePrivacySettings": "Private",
+        "arena.enableAutomaticTabAutocomplete": false,
+        "arena.enableTabAutocomplete": true,
+        // Codeium Settings
+        "codeium.aggressiveShutdown": false,
+        "codeium.enableSearch": "default",
+        // Editor Settings
+        "editor.acceptSuggestionOnEnter": "smart",
+        "editor.detectIndentation": false,
+        "editor.indentSize": "tabSize",
+        "editor.insertSpaces": true,
+        "editor.suggest.preview": true,
+        "editor.tabCompletion": "on",
+        "editor.tabSize": 2,
+        // Git Settings
+        "git.autofetch": true,
+        "git.enableSmartCommit": true,
+        "git.ignoreLimitWarning": true,
+        "git.mergeEditor": true,
+        "git.terminalAuthentication": true,
+        "git.openRepositoryInParentFolders": "prompt",
+        // Terminal Settings
+        "terminal.integrated.suggest.builtinCompletions": {
+          "pwshCode": true,
+          "pwshGit": true
+        },
+        // Workbench Settings
+        "workbench.editorAssociations": {
+          "*.ipynb": "jupyter-notebook",
+          "*.wav": "wavPreview.audioPreview",
+          "*.csv": "gc-excelviewer-csv-editor"
+        },
+      }
+    }
+  }
+}

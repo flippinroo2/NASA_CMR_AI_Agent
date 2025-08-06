@@ -1,0 +1,183 @@
+{
+  "name": "Python",
+  "id": "python",
+  "description": "A custom feature to install Python",
+  "version": "0.0.1",
+  "dependsOn": {
+    "./features/debian/debian_base_packages": {},
+    "./features/environment": {
+      "PYTHON": true
+    }
+  },
+  "installsAfter": [
+    "./features/environment"
+  ],
+  "options": {
+    "PYTHON_VERSION": {
+      "type": "string",
+      "description": "Version of Python to install",
+      "default": "3.12.7",
+      "proposals": [
+        "3.9.21",
+        "3.10.16",
+        "3.11.11",
+        "3.12.7",
+        "3.13.1"
+      ]
+    }
+  },
+  "onCreateCommand": "pyenv install ${PYTHON_VERSION} && pyenv global ${PYTHON_VERSION}",
+  "updateContentCommand": "uv tool install poetry && uv tool install ruff",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "njqdev.vscode-python-typehint",
+        "oderwat.indent-rainbow"
+      ],
+      "settings": {
+        // Python Settings
+        "[django-html]": {},
+        "[python]": {
+          "diffEditor.ignoreTrimWhitespace": false,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": "never",
+            "source.fixAll.pylance": "never",
+            "source.fixAll.ruff": "never",
+            "source.organizeImports": "explicit",
+            "source.organizeImports.ruff": "explicit"
+          },
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.detectIndentation": false,
+          "editor.formatOnSave": true,
+          "editor.formatOnType": false,
+          "editor.formatOnPaste": false,
+          // "editor.indentSize": "tabSize",
+          // "editor.insertSpaces": false,
+          // "editor.tabSize": 2
+        },
+        "[ipynb]": {
+          // "editor.defaultFormatter": "vscode.ipynb"
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "[mojo]": {
+          "editor.defaultFormatter": "modular-mojotools.vscode-mojo"
+        },
+        "isort.serverEnabled": true,
+        // Jupyter Settings
+        "jupyter.allowUnauthorizedRemoteConnection": true,
+        "jupyter.askForKernelRestart": false,
+        "jupyter.debugJustMyCode": false,
+        "jupyter.disableJupyterAutoStart": true,
+        "jupyter.exportWithOutputEnabled": false,
+        "jupyter.interactiveWindow.codeLens.commands": "jupyter.runcell, jupyter.runallcellsabove, jupyter.debugcell",
+        "jupyter.interactiveWindow.codeLens.debugCommands": "jupyter.debugcontinue, jupyter.debugstop, jupyter.debugstepover",
+        "jupyter.interactiveWindow.codeLens.enable": true,
+        "jupyter.interactiveWindow.codeLens.enableGotoCell": true,
+        "jupyter.interactiveWindow.creationMode": "single",
+        "jupyter.interactiveWindow.splitRunFileIntoCells": true,
+        "jupyter.interactiveWindow.textEditor.cellFolding": true,
+        "jupyter.interactiveWindow.textEditor.executeSelection": false,
+        "jupyter.interactiveWindow.textEditor.magicCommandsAsComments": false,
+        "jupyter.interactiveWindow.textEditor.normalizeSelection": true,
+        "jupyter.interactiveWindow.viewColumn": "secondGroup",
+        "jupyter.jupyterInterruptTimeout": 10000,
+        "jupyter.jupyterLaunchRetries": 5,
+        "jupyter.jupyterLaunchTimeout": 30000,
+        // "jupyter.logging.level": "debug",
+        "jupyter.logKernelOutputSeparately": true,
+        "jupyter.notebookFileRoot": "${fileDirname}",
+        "jupyter.showOutlineButtonInNotebookToolbar": true,
+        "jupyter.showVariableViewWhenDebugging": false,
+        "jupyter.stopOnFirstLineWhileDebugging": false,
+        "jupyter.themeMatplotlibPlots": false,
+        "jupyter.useDefaultConfigForJupyter": false,
+        "jupyter.variableExplorerExclude": "module;function;builtin_function_or_method;ABCMeta;type;ModelMetaclass",
+        // Jupyter Notebook - Display Settings
+        "notebook.breadcrumbs.showCodeCells": true,
+        "notebook.codeActionsOnSave": {
+          "notebook.source.fixAll": "never",
+          "notebook.source.organizeImports": "explicit"
+        },
+        "notebook.compactView": true,
+        "notebook.confirmDeleteRunningCell": true,
+        "notebook.cellToolbarLocation": {
+          "default": "right"
+        },
+        "notebook.cellToolbarVisibility": "hover",
+        "notebook.defaultFormatter": "charliermarsh.ruff",
+        "notebook.diff.enablePreview": true,
+        "notebook.diff.ignoreMetadata": false,
+        "notebook.diff.ignoreOutputs": true,
+        "notebook.diff.overviewRuler": false,
+        "notebook.dragAndDropEnabled": true,
+        "notebook.formatOnSave.enabled": true,
+        "notebook.insertFinalNewline": false,
+        "notebook.lineNumbers": "on",
+        "notebook.output.wordWrap": true,
+        "notebook.showFoldingControls": "mouseover",
+        "python.analysis.autoImportCompletions": true,
+        "python.analysis.autoFormatStrings": false,
+        "python.analysis.diagnosticSeverityOverrides": {
+          "reportAssignmentType": "warning",
+          "reportAttributeAccessIssue": "warning",
+          "reportCallIssue": "warning",
+          "reportGeneralTypeIssues": "information",
+          "reportIndexIssue": "warning",
+          "reportIncompatibleMethodOverride": "warning",
+          "reportMissingImports": "error",
+          "reportRedeclaration": "warning",
+          "reportReturnType": "warning",
+          "reportUnusedImport": "information",
+          "reportUnusedVariable": "information"
+        },
+        "python.analysis.enableSyncServer": false,
+        "python.analysis.exclude": [
+          "**/node_modules",
+          "**/__pycache__"
+        ],
+        "python.analysis.importFormat": "absolute",
+        "python.analysis.ignore": [],
+        "python.analysis.indexing": true,
+        "python.analysis.inlayHints.callArgumentNames": "all",
+        "python.analysis.inlayHints.functionReturnTypes": true,
+        "python.analysis.inlayHints.pytestParameters": true,
+        "python.analysis.inlayHints.variableTypes": true,
+        "python.analysis.languageServerMode": "light",
+        "python.analysis.logLevel": "Information",
+        "python.analysis.packageIndexDepths": [
+          {
+            "name": "torch",
+            "depth": 2,
+            "includeAllSymbols": true
+          }
+        ],
+        "python.analysis.persistAllIndices": true,
+        "python.analysis.typeCheckingMode": "standard",
+        "python.analysis.useLibraryCodeForTypes": true,
+        "python.analysis.userFileIndexingLimit": 10000,
+        "python.createEnvironment.trigger": "off",
+        "python.globalModuleInstallation": false,
+        "python.interpreter.infoVisibility": "always",
+        "python.languageServer": "Pylance",
+        "python.locator": "js",
+        "python.pipenvPath": "pipenv",
+        "python.poetryPath": "poetry",
+        "python.terminal.activateEnvInCurrentTerminal": false,
+        "python.terminal.activateEnvironment": false,
+        "python.venvPath": "${fileDirname}",
+        // Ruff Settings
+        "ruff.codeAction.fixViolation": {
+          "enable": true
+        },
+        "ruff.format.args": [
+          "indent-size=2"
+        ],
+      }
+    }
+  }
+}
