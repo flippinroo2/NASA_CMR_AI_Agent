@@ -1,0 +1,14 @@
+AGENT_LIST: []
+DEBUG: False
+HOST: "0.0.0.0"
+LLM_PROVIDERS:
+  [
+    { anthropic: "langchain_anthropic.ChatAnthropic" },
+    { google: "langchain_google.ChatGoogleGenerativeAI" },
+    { mistral: "langchain_mistral.ChatMistralAI" },
+    { openai: "langchain_openai.ChatOpenAI" },
+  ]
+PORT: 5050
+PRODUCTION_MODE: False
+PRODUCTION_ENDPOINT: "https://cmr.earthdata.nasa.gov/search/"
+TEST_ENDPOINT: "https://cmr.uat.earthdata.nasa.gov/search/"
