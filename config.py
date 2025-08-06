@@ -122,4 +122,4 @@ class Configuration:
                 return
 
 
-# Configuration()  # TODO: Consider putting this back and just calling "import" from other files since there is a multiple __init__ protection in place.
+Configuration()  # TODO: Consider putting this back and just calling "import" from other files since there is a multiple __init__ protection in place.

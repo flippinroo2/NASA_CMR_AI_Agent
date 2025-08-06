@@ -5,6 +5,7 @@ from enum import Enum
 from typing import Any
 
 import aiohttp
+from aiohttp.client_exceptions import InvalidUrlClientError
 import requests
 
 from config import Configuration
@@ -121,8 +122,10 @@ class APIManager:
             ):
                 response.raise_for_status()
                 return await response.json()
+        except InvalidUrlClientError as e:
+            print(f"APIManager.async_get_request() - InvalidUrlClientError: {e}")
         except Exception as e:
-            print(f"async_get_request() - ERROR: {e}")
+            print(f"APIManager.async_get_request() - Exception: {e}")
 
     @staticmethod
     async def query_cmr(endpoint: CMR_ENDPOINTS, params=None, **kwargs):

@@ -59,12 +59,11 @@ user_interface: gradio.Blocks = create_user_interface(query_agents, query_cmr)
 app = gradio.mount_gradio_app(app, user_interface, path="")
 
 if __name__ == "__main__":
-    config = Configuration()
-    if config.is_debug_mode_activated:
+    if Configuration.is_debug_mode_activated:
         print("DEBUG FUNCTIONALITY ENABLED")
         test_cmr_query = asyncio.run(
             query_cmr(CMR_ENDPOINTS.COLLECTIONS.name, "MODIS", 10, 1, 0)
         )
         print("END")
     else:
-        uvicorn.run(app, host=config.host, port=config.port)
+        uvicorn.run(app, host=Configuration.host, port=Configuration.port)

@@ -7,7 +7,6 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.13"
-python_utils = { path = "../python/python_utils", develop = true }
 langgraph = "^0.6.3"
 langchain = "^0.3.27"
 langchain-community = "^0.3.27"
