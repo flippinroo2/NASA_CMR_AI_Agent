@@ -1,0 +1,13 @@
+{
+  "name": "Debian Base Packages",
+  "id": "debian_base_packages",
+  "description": "A custom feature to add base packages to Debian LINUX",
+  "version": "0.0.1",
+  "dependsOn": {
+    "./features/environment": {
+      "ALIASES": true,
+      "GROUPS": true,
+      "VARIABLES": true
+    }
+  }
+}

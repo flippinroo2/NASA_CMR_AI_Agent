@@ -1,0 +1,19 @@
+{
+  "name": "Programming Languages",
+  "id": "programming_languages",
+  "description": "A custom feature to install various programming languages based on variables passed in.",
+  "version": "0.0.1",
+  "dependsOn": {
+    "./features/debian/debian_base_packages": {}
+  },
+  "installsAfter": [
+    "./features/debian/debian_base_packages"
+  ],
+  "options": {
+    "NODEJS": {
+      "type": "boolean",
+      "default": true,
+      "description": "Should NodeJS be installed"
+    }
+  }
+}

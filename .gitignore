@@ -2,6 +2,9 @@
 **/*.env
 **/*.pyc
 **/HIDDEN_NOTES.md
+**/.onCreateCommandMarker
+**/.postCreateCommandMarker
+**/.updateContentCommandMarker
 
 # FOLDERS
 .venv
