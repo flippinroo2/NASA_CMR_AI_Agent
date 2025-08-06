@@ -7,21 +7,8 @@ services:
       dockerfile: Dockerfile
     image: nasa_cmr_agent_image
     command: sleep infinity
-    # command: tail -f /dev/null # This keeps the container running
     volumes:
       - .:/home/vscode/.devcontainer
       - ../.bash_history:/home/vscode/.bash_history
       - ../cli:/home/vscode/cli
       - ../Makefile:/home/vscode/Makefile
-    # The lines below are needed to allow Docker to access the GPU
-    # CUDA_VISIBLE_DEVICES=0,1,2,3 docker run --gpus all nvidia/cuda:10.0-base nvidia-smi
-    environment:
-      - gpus=all
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    # logging can be setup here
