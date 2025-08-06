@@ -40,7 +40,7 @@
     "./features/debian/programming_languages/python": {},
     // "./features/mounts/api_keys": {},
     // "./features/mounts/ssh": {},
-    "./features/mounts/test_folder": {},
+    "./features/mounts/development_folder": {},
     "./features/environment": {
       // Moved this to last so the permissions would be updated after everything else
     }

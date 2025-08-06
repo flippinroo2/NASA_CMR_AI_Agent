@@ -1,12 +1,12 @@
 {
-  "name": "Test Folder",
-  "id": "test_folder",
+  "name": "Development Folder",
+  "id": "development_folder",
   "description": "A custom feature to create a mounted test folder.",
   "version": "0.0.1",
   "mounts": [
     {
-      "source": "../testing",
-      "target": "/home/vscode/development/testing",
+      "source": "..",
+      "target": "/home/vscode/development",
       "type": "bind"
     }
   ]
