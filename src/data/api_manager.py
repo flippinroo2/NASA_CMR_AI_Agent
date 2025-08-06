@@ -11,15 +11,15 @@ from config import Configuration
 
 
 class CMR_ENDPOINTS(Enum):
-    AUTOCOMPLETE = "autocomplete"  # Allows the q= parameter to be used to search
+    AUTOCOMPLETE = "autocomplete"
     COLLECTIONS = "collections"
     GRANULES = "granules"
 
 
-# Using "dataclass" instead of Pydantic here to avoid additional overhead.
-# TODO: Look into if typeddict would be better because they're more performant than dataclass at runtime... and we're not defining all properties here from the actual responses.
+# NOTE: Using "dataclass" instead of Pydantic here to avoid additional overhead.
 
 
+# TODO: Look into if typeddict would be better (or if this amount of structure is even necessary?) because they're more performant than dataclass at runtime... and not all properties are included from the actual responses.
 @dataclass()
 class AutocompleteEntry:
     score: float
@@ -67,6 +67,7 @@ class SearchResponse:
     feed: FeedItem
 
 
+# TODO: Consider removing later, but is useful now for helping understand CMR API
 @dataclass
 class CMRSearchParameters:
     entry_title: str | None = field(default=None)
@@ -87,6 +88,7 @@ class CMRSearchParameters:
     standard_product: str | None = field(default=None)
 
 
+# TODO: Consider removing later, but is useful now for helping understand CMR API
 @dataclass
 class CMRQueryParameters:
     page_size: int = field(default=10)  # Number of results per page
@@ -110,9 +112,6 @@ class CMRQueryParameters:
 
 
 class APIManager:
-    def __init__(self, api_key):
-        self.api_key = api_key
-
     @staticmethod
     async def get_request(url: str, params=None) -> Any:
         try:
@@ -143,17 +142,15 @@ class APIManager:
         _search_feed: FeedItem = _search_response.feed
         return _search_feed.get(
             "entry", []
-        )  # TODO: Figure out the type safety stuff here.
+        )  # TODO: Figure out the type safety stuff here. (Again... consider if this amount of structure is necessary...?)
 
     @staticmethod
-    def query_collections_endpoint(params) -> list[dict[str, Any]]:
+    async def query_collections_endpoint(params=None, **kwargs) -> list[dict[str, Any]]:
+        # NOTE: This function seems redundant and probably not necessary.
         _base_url = Configuration.base_endpoint
-        url = f"{_base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
-        # TODO: Add error handling
-        response: requests.Response = requests.get(url, params=params)
-        response.raise_for_status()  # Raise errors for bad status codes
-        _response_json: Any = response.json()
-        _feed_entry_list = APIManager._get_search_entry_list(_response_json)
+        _url: str = f"{_base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
+        _response = await APIManager.get_request(_url, params=params)
+        _feed_entry_list = APIManager._get_search_entry_list(_response)
         for _feed_entry in _feed_entry_list:
             _feed_entry_class: CollectionEntry = CollectionEntry(
                 **_feed_entry

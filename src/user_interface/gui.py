@@ -2,7 +2,7 @@ import gradio
 
 from src.data.api_manager import CMR_ENDPOINTS
 
-# from python_utils.ui.SeabornCharts import DataVisualizer
+# from python_utils.ui.SeabornCharts import DataVisualizer # NOTE: This is here for reference later when it's time to work on visualizations.
 
 
 def create_agent_interface_tab(agent_query_function) -> gradio.Tab:

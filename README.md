@@ -16,6 +16,7 @@ Explains the acronyms used - <https://wiki.earthdata.nasa.gov/display/CMR/CMR+Cl
 
 Endpoints:
 
+autocomplete = Main difference is this allows the q= parameter to be used to search??? and then it returns collections?
 collections = Descriptions of entire datasets.
 granules = Descriptions of individual data files within a dataset.
 

@@ -2,6 +2,8 @@
 # import seaborn
 # import matplotlib
 
+# NOTE: This is a template file I've used in the past.
+# TODO: Delete this file if not using it
 
 # class DataVisualizer:
 #   def __init__(self):
