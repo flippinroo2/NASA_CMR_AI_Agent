@@ -9,6 +9,3 @@ services:
     command: sleep infinity
     volumes:
       - .:/home/vscode/.devcontainer
-      - ../.bash_history:/home/vscode/.bash_history
-      - ../cli:/home/vscode/cli
-      - ../Makefile:/home/vscode/Makefile

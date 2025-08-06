@@ -9,7 +9,7 @@ from fastapi import FastAPI
 
 from config import Configuration
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
-from src.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
 from src.user_interface.gui import create_user_interface
 
 print("\n__init__.py\n")  # TODO: Remove print statement here

@@ -9,8 +9,10 @@ from fastapi import FastAPI
 
 from config import Configuration
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
-from src.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from src.llm.agent_manager import AgentManager
+from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
 from src.user_interface.gui import create_user_interface
+from src.workflow_manager import WorkflowManager
 
 app = FastAPI()  # This is used to enable concurrent handling of requests.
 
@@ -22,10 +24,12 @@ def connect_to_llm():
 
 
 async def query_agents(*args, **kwargs):
-    # TODO: Begin working on agents
-    # llm = connect_to_llm()
-    data = query_cmr()
-    return data
+    workflow_manager = WorkflowManager()
+    compiled_workflow = workflow_manager.workflow.compile()
+
+    llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
+    agent_manager = AgentManager(llm_provider)
+    return workflow_manager
 
 
 async def query_cmr(
@@ -61,9 +65,10 @@ app = gradio.mount_gradio_app(app, user_interface, path="")
 if __name__ == "__main__":
     if Configuration.is_debug_mode_activated:
         print("DEBUG FUNCTIONALITY ENABLED")
-        test_cmr_query = asyncio.run(
-            query_cmr(CMR_ENDPOINTS.COLLECTIONS.name, "MODIS", 10, 1, 0)
-        )
+        # test_cmr_query = asyncio.run(
+        #     query_cmr(CMR_ENDPOINTS.COLLECTIONS.name, "MODIS", 10, 1, 0)
+        # )
+        test_agent_query = asyncio.run(query_agents())
         print("END")
     else:
         uvicorn.run(app, host=Configuration.host, port=Configuration.port)
