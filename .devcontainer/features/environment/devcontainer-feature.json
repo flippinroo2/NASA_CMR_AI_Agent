@@ -1,0 +1,30 @@
+{
+  "name": "Aliases",
+  "id": "aliases",
+  "description": "Adding shell aliases to environment.",
+  "documentationURL": "https://github.com/flippinroo2/aliases",
+  "licenseURL": "https://github.com/flippinroo2/aliases/blob/main/LICENSE",
+  "version": "0.0.1",
+  "options": {
+    "ALIASES": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should environment aliases be added"
+    },
+    "GROUPS": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should groups be configured"
+    },
+    "PYTHON": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should Python environment variables be added"
+    },
+    "VARIABLES": {
+      "type": "boolean",
+      "default": false,
+      "description": "Should environment variables be added"
+    }
+  }
+}

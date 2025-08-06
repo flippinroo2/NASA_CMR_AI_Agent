@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  ubuntu:
+    container_name: nasa_cmr_agent_container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nasa_cmr_agent_image
+    command: sleep infinity
+    volumes:
+      - .:/home/vscode/.devcontainer
+      - ../.bash_history:/home/vscode/.bash_history
+      - ../cli:/home/vscode/cli
+      - ../Makefile:/home/vscode/Makefile
