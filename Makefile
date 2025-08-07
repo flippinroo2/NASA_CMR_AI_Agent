@@ -1,23 +1,23 @@
 # Variables
 
 # Commands
-.PHONY: clean install nuke reinstall
+.PHONY: project_install ollama_install ollama_pull_gemma3 ollama_start
 
-all: reinstall
+all: install ollama_start
 
-data_scraper: reinstall
+install: ollama_install project_install
+	@echo "Installed devcontainer..."
 
-clean:
-	@echo "Cleaning..."
-	@rm -rf "__pycache__"
-
-install:
+PROJECT_DIRECTORY:=development/
+project_install:
 	@echo "Installing..."
-	poetry install --no-root
+	$(MAKE) -C $(PROJECT_DIRECTORY)
 
-nuke: clean
-	@echo "Nuking..."
-	@rm -rf ".venv" "poetry.lock"
+OLLAMA_URL:=https://ollama.com/install.sh
+ollama_install:
+	@echo "Installing Ollama..."
+	curl -fsSL $(OLLAMA_URL) | sh
 
-reinstall: nuke install
-	@echo "Reinstalled..."
+ollama_start:
+	@echo "Starting Ollama..."
+	ollama serve

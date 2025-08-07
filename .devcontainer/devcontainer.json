@@ -38,8 +38,6 @@
       "cudnnVersion": "automatic"
     },
     "./features/debian/programming_languages/python": {},
-    // "./features/mounts/api_keys": {},
-    // "./features/mounts/ssh": {},
     "./features/mounts/project_files": {},
     "./features/environment": {
       // Moved this to last so the permissions would be updated after everything else
@@ -51,7 +49,6 @@
         "christian-kohler.npm-intellisense",
         "christian-kohler.path-intellisense",
         "codeium.codeium",
-        "copilot-arena.copilot-arena",
         "davidanson.vscode-markdownlint",
         "dotjoshjohnson.xml",
         "eamodio.gitlens",
@@ -70,10 +67,6 @@
         "[markdown]": {
           "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
         },
-        // LM Arena Settings
-        "arena.codePrivacySettings": "Private",
-        "arena.enableAutomaticTabAutocomplete": false,
-        "arena.enableTabAutocomplete": true,
         // Codeium Settings
         "codeium.aggressiveShutdown": false,
         "codeium.enableSearch": "default",

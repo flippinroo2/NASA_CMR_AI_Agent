@@ -8,28 +8,34 @@ import uvicorn
 from fastapi import FastAPI
 
 from config import Configuration
+from lib.file_functions import (
+    get_files_by_extension_in_directory,
+    read_file_as_text_string,
+)
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
 from src.llm.agent_manager import AgentManager
 from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
 from src.user_interface.gui import create_user_interface
-from src.workflow_manager import WorkflowManager
+from src.workflow_manager import AgentState, WorkflowManager
 
 app = FastAPI()  # This is used to enable concurrent handling of requests.
 
 
-def connect_to_llm():
-    _llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
-    _llm = _llm_provider.get_llm("Ollama")
-    return _llm
-
-
-async def query_agents(*args, **kwargs):
-    workflow_manager = WorkflowManager()
-    compiled_workflow = workflow_manager.workflow.compile()
-
+async def query_agents(agent_query: str, *args, **kwargs):
     llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
     agent_manager = AgentManager(llm_provider)
-    return workflow_manager
+    response = agent_manager.process_query(agent_query)
+    return response
+
+
+async def create_workflow(*args, **kwargs):
+    llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
+    workflow_manager = WorkflowManager(
+        llm_provider
+    )  # TODO: We only want this to run once for the entire application and not every time we query.
+
+    compiled_workflow = workflow_manager.workflow.compile()
+    return compiled_workflow
 
 
 async def query_cmr(
@@ -68,7 +74,14 @@ if __name__ == "__main__":
         # test_cmr_query = asyncio.run(
         #     query_cmr(CMR_ENDPOINTS.COLLECTIONS.name, "MODIS", 10, 1, 0)
         # )
-        test_agent_query = asyncio.run(query_agents())
+        text_files: list[str] = get_files_by_extension_in_directory(
+            "prompts", "txt"
+        )  # NOTE: These are not going to be returned sorted.
+        workflow = asyncio.run(create_workflow())
+        for text_file in text_files:
+            text_file_content: str = read_file_as_text_string(text_file)
+            # test_agent_query = asyncio.run(query_agents(text_file_content))
+            workflow_result = workflow.invoke(AgentState({"query": text_file_content}))
         print("END")
     else:
         uvicorn.run(app, host=Configuration.host, port=Configuration.port)

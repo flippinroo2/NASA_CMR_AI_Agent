@@ -83,6 +83,7 @@ def create_api_requester_tab(api_request_function) -> gradio.Tab:
                 search_query,
                 page_size_parameter,
                 page_number_parameter,
+                offset_parameter,
             ],
             outputs=api_request_output,
         )
