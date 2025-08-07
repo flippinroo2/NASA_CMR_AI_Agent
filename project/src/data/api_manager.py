@@ -5,10 +5,12 @@ from enum import Enum
 from typing import Any
 
 import aiohttp
-from aiohttp.client_exceptions import InvalidUrlClientError
 import requests
+from aiohttp.client_exceptions import InvalidUrlClientError
 
 from config import Configuration
+
+# NOTE: I think this was a bit overengineered. In the beginning it was tough to understand the structure of the CMR API.
 
 
 class CMR_ENDPOINTS(Enum):
@@ -128,10 +130,16 @@ class APIManager:
             print(f"APIManager.async_get_request() - Exception: {e}")
 
     @staticmethod
-    async def query_cmr(endpoint: CMR_ENDPOINTS, params=None, **kwargs):
+    async def query_cmr(endpoint: CMR_ENDPOINTS, params: dict[str, Any] = {}, **kwargs):
+        _params: dict[str, Any] = params
+        if _params.get("page_size") is None:
+            _params = {
+                **_params,
+                "page_size": 10,
+            }  # TODO: Fix this. It's really badly written and just done to brute force the LLM to work.
         _base_url = Configuration.base_endpoint
         _url = f"{_base_url}{endpoint.value}.json"
-        _response = await APIManager.get_request(_url, params=params)
+        _response = await APIManager.get_request(_url, params=_params)
         if _response is not None:
             _return_value: Any = _response
             _return_value = APIManager._get_search_entry_list(_response)

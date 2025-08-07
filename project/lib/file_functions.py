@@ -136,8 +136,6 @@ def write_string_to_file(filename: str, text_to_write: str) -> TextIOWrapper:
         _file_extension = get_file_extension_from_filepath(filename)
         if _file_extension == FILE_EXTENSIONS.JSON.value:
             text_to_write = format_json_string(text_to_write)
-        if _file_extension == FILE_EXTENSIONS.TEXT.value:
-            text_to_write = text_to_write.replace("\\n", "\n")
         with open(file=filename, mode="w", encoding="utf-8") as file:
             file.write(text_to_write)
         return file
