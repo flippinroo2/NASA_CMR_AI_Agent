@@ -2,28 +2,24 @@
 
 > This application is in a __VERY__ early state... Check back in a few days when v0.0.1 tag is created and the debugging comments have been removed.
 
-## CMR NOTES
+## INSTALLATION
 
-CMR Overview - <https://www.earthdata.nasa.gov/about/esdis/eosdis/cmr>
+This project comes included with a ".devcontainer" folder, which will allow you to open a secluded environment within Docker for local development.
 
-Wiki main link - <https://wiki.earthdata.nasa.gov/display/CMR/Common+Metadata+Repository+Home>
+Here are the instructions for local development installation:
 
-Explains the parameters - <https://wiki.earthdata.nasa.gov/display/CMR/CMR+Client+Partner+User+Guide#CMRClientPartnerUserGuide-APIcallsandparametersGETmethod>
+1. Simply clone the repository.
+2. Open the repository if your favorite development environment (*this project was developed in VS Code, but it should work in many popular development environments*)
+3. Select to open project inside devcontainer.
+  - This will automatically setup an Ubuntu machine with various utilities, including NVIDIA capabilities. (*As long as you have the NVIDIA container toolkit installed on your host machine*)
+4. Open a terminal in the default directory and run the `make` command.
+  - This will install Ollama within the container.
+  - Create a virtual environment and install all necessary python packages.
 
-Explains the acronyms used - <https://wiki.earthdata.nasa.gov/display/CMR/CMR+Client+Partner+User+Guide#CMRClientPartnerUserGuide-Chapter5:Accessingdata>
+### INSTALLATION - DEBUGGING
 
-<https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html>
+This project is already setup for debugging within VS Code. You should be able to start the application with debugging enabled by navigating to the "Run and Debug" tab within VS Code and pressing the play button.
 
-Endpoints:
+## USAGE
 
-autocomplete = Main difference is this allows the q= parameter to be used to search??? and then it returns collections?
-collections = Descriptions of entire datasets.
-granules = Descriptions of individual data files within a dataset.
-
-Possible Endpoints:
-
-service ???
-tool ???
-variable ???
-visualizations ???
-grid ???
+You will notice a "prompts" directory in the root of this project. This project will iterate through each of the files and 

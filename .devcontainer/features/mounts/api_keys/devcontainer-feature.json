@@ -1,9 +1,0 @@
-{
-  "name": "API Keys",
-  "id": "api_keys",
-  "description": "A custom feature used to mount the .api_keys file.",
-  "version": "0.0.1",
-  "mounts": [
-    "source=../../../../../../../config/Shell/.shell/.api_keys,target=/home/vscode/.shell/.api_keys,type=bind"
-  ]
-}

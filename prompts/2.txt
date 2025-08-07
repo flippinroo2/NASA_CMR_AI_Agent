@@ -1,0 +1,1 @@
+Compare precipitation datasets suitable for drought monitoring in Sub-Saharan Africa between 2015-2023, considering both satellite and ground-based observations, and identify gaps in temporal coverage.

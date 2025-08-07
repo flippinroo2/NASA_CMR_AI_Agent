@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "NASA_CMR_AI_Agent"
+version = "0.1.0"
+description = ""
+authors = ["flippinroo2 <flippinroo2@gmx.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+langgraph = "^0.6.3"
+langchain = "^0.3.27"
+langchain-community = "^0.3.27"
+pyyaml = "^6.0.2"
+gradio = "^5.41.0"
+fastapi = "^0.116.1"
+uvicorn = "^0.35.0"
+websockets = "^15.0.1"
+aiohttp = "^3.12.15"
+neo4j = "^5.28.2"
+sentence-transformers = "^5.1.0"
+langchain-ollama = "^0.3.6"
+
+[tool.poetry.group.core]
+optional = false
+
+[tool.poetry.group.core.dependencies]
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.debug]
+optional = true
+
+[tool.poetry.group.debug.dependencies]
+debugpy = "^1.8.1"
+
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+useLibraryCodeForTypes = true
+exclude = [".cache"]
+
+[tool.ruff.lint]
+# https://beta.ruff.rs/docs/configuration/
+select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
+ignore = ['E501', 'W291', 'W292', 'W293']
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

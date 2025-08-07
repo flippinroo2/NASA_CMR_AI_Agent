@@ -1,0 +1,98 @@
+{
+  "name": "Project Folder",
+  "id": "project_folder",
+  "description": "A custom feature to create a mounted test folder.",
+  "version": "0.0.1",
+  "mounts": [
+    {
+      "source": "../Makefile",
+      "target": "/home/vscode/Makefile",
+      "type": "bind"
+    },
+    {
+      "source": "../README.md",
+      "target": "/home/vscode/README.md",
+      "type": "bind"
+    },
+    {
+      "source": "../.vscode",
+      "target": "/home/vscode/.vscode",
+      "type": "bind"
+    },
+    {
+      "source": "../project/llm_examples",
+      "target": "/home/vscode/development/llm_examples",
+      "type": "bind"
+    },
+    {
+      "source": "../project/lib",
+      "target": "/home/vscode/development/lib",
+      "type": "bind"
+    },
+    {
+      "source": "../project/logs",
+      "target": "/home/vscode/development/logs",
+      "type": "bind"
+    },
+    {
+      "source": "../project/src",
+      "target": "/home/vscode/development/src",
+      "type": "bind"
+    },
+    {
+      "source": "../project/tests",
+      "target": "/home/vscode/development/tests",
+      "type": "bind"
+    },
+    {
+      "source": "../project/__main__.py",
+      "target": "/home/vscode/development/__main__.py",
+      "type": "bind"
+    },
+    {
+      "source": "../project/.env.example",
+      "target": "/home/vscode/development/.env.example",
+      "type": "bind"
+    },
+    {
+      "source": "../project/.gitignore",
+      "target": "/home/vscode/development/.gitignore",
+      "type": "bind"
+    },
+    {
+      "source": "../project/config.py",
+      "target": "/home/vscode/development/config.py",
+      "type": "bind"
+    },
+    {
+      "source": "../project/config.yaml",
+      "target": "/home/vscode/development/config.yaml",
+      "type": "bind"
+    },
+    {
+      "source": "../project/Makefile",
+      "target": "/home/vscode/development/Makefile",
+      "type": "bind"
+    },
+    {
+      "source": "../project/poetry.toml",
+      "target": "/home/vscode/development/poetry.toml",
+      "type": "bind"
+    },
+    {
+      "source": "../project/pyproject.toml",
+      "target": "/home/vscode/development/pyproject.toml",
+      "type": "bind"
+    },
+    {
+      "source": "../project/README.md",
+      "target": "/home/vscode/development/README.md",
+      "type": "bind"
+    },
+    {
+      "source": "../prompts",
+      "target": "/home/vscode/development/prompts",
+      "type": "bind"
+    }
+  ]
+}

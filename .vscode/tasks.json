@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ollama - Pull gemma3:latest",
+      "type": "shell",
+      "command": "ollama pull gemma3:latest",
+      "hide": true
+    }
+  ]
+}
