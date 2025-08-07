@@ -14,9 +14,10 @@ from lib.file_functions import (
 )
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
 from src.llm.agent_manager import AgentManager
+from src.llm.agents.agent_state import AgentState
 from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from src.llm.workflow.workflow_manager import WorkflowManager
 from src.user_interface.gui import create_user_interface
-from src.workflow_manager import AgentState, WorkflowManager
 
 app = FastAPI()  # This is used to enable concurrent handling of requests.
 

@@ -9,7 +9,7 @@
   "hostRequirements": {
     "cpus": 1,
     "gpu": "optional",
-    "storage": "10gb"
+    "storage": "15gb"
   },
   "dockerComposeFile": "./docker-compose.yml",
   "shutdownAction": "stopCompose",
@@ -78,6 +78,8 @@
         "editor.suggest.preview": true,
         "editor.tabCompletion": "on",
         "editor.tabSize": 2,
+        "editor.wordWrap": "on",
+        "editor.wordWrapColumn": 110,
         // Git Settings
         "git.autofetch": true,
         "git.enableSmartCommit": true,

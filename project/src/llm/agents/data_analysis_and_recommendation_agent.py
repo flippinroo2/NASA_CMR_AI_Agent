@@ -1,12 +1,11 @@
 from src.knowledge_graph import KnowledgeGraph
 from src.llm.context_manager import ContextManager
+from src.llm.agents.agent import Agent
 
 
-class QueryIntentAnalysisAgent:
-    def __init__(self, llm):
-        self.llm = llm
-        self.context_manager = ContextManager()
-        self.knowledge_graph = KnowledgeGraph()
+class DataAnalysisAndRecommendationAgent(Agent):
+    def invoke(self, query: str):
+        return self.llm.invoke(query)
 
     def process(self, query: str):
         """Classify query intent using LLM"""

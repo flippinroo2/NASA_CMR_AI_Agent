@@ -30,11 +30,6 @@
       "type": "bind"
     },
     {
-      "source": "../project/logs",
-      "target": "/home/vscode/development/logs",
-      "type": "bind"
-    },
-    {
       "source": "../project/src",
       "target": "/home/vscode/development/src",
       "type": "bind"
@@ -55,7 +50,7 @@
       "type": "bind"
     },
     {
-      "source": "../project/.gitignore",
+      "source": "../.gitignore",
       "target": "/home/vscode/development/.gitignore",
       "type": "bind"
     },

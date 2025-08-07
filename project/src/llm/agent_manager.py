@@ -4,10 +4,13 @@ from config import Configuration
 from lib.file_functions import write_string_to_file
 from lib.time_functions import get_timestamp
 from src.knowledge_graph import KnowledgeGraph
-from src.llm.agents.cmr_agent import CMRAgent
-from src.llm.agents.query_intent_analysis_agent import QueryIntentAnalysisAgent
+from src.llm.agents.cmr_api_agent import CMRApiAgent
+from src.llm.agents.query_interpretation_and_validation_agent import (
+    QueryInterpretationAndValidationAgent,
+)
 from src.llm.context_manager import ContextManager
 from src.llm.llm_provider import LLMProvider
+from lib.string_functions import sanitize_llm_output
 
 
 class AgentManager:
@@ -21,7 +24,7 @@ class AgentManager:
 
     def process_query(self, query: str):
         # Step 1: Intent classification
-        intent = QueryIntentAnalysisAgent(self.llm).process(query)
+        intent = QueryInterpretationAndValidationAgent(self.llm).process(query)
 
         # Step 2: Context enrichment
         enriched_query = self._enrich_with_context(query, intent)
@@ -44,25 +47,26 @@ class AgentManager:
     def _output_to_file(self, query, intent, enriched_query, subqueries, params):
         if Configuration.is_debug_mode_activated:
             current_timestamp = get_timestamp()
+            _sanitized_output = sanitize_llm_output(_pretty_text)
             write_string_to_file(
                 filename=f"logs/{current_timestamp}/query.txt",
-                text_to_write=json.dumps(query),
+                text_to_write=json.dumps(_sanitized_output),
             )
             write_string_to_file(
                 filename=f"logs/{current_timestamp}/intent.txt",
-                text_to_write=json.dumps(intent),
+                text_to_write=json.dumps(_sanitized_output),
             )
             write_string_to_file(
                 filename=f"logs/{current_timestamp}/enriched_query.txt",
-                text_to_write=json.dumps(enriched_query),
+                text_to_write=json.dumps(_sanitized_output),
             )
             write_string_to_file(
                 filename=f"logs/{current_timestamp}/subqueries.txt",
-                text_to_write=json.dumps(subqueries),
+                text_to_write=json.dumps(_sanitized_output),
             )
             write_string_to_file(
                 filename=f"logs/{current_timestamp}/params.txt",
-                text_to_write=json.dumps(params),
+                text_to_write=json.dumps(_sanitized_output),
             )
 
     def _enrich_with_context(self, query: str, intent: str) -> str:

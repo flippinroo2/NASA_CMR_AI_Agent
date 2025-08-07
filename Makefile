@@ -18,6 +18,13 @@ ollama_install:
 	@echo "Installing Ollama..."
 	curl -fsSL $(OLLAMA_URL) | sh
 
+ollama_pull_gemma3:
+	@echo "Pulling gemma3:latest..."
+	ollama pull gemma3:latest
+
+# Would like to make this a service, but it is very complicated getting systemd working in Docker containers... I did find this possible alternative https://github.com/gdraheim/docker-systemctl-replacement
 ollama_start:
-	@echo "Starting Ollama..."
+	@echo "Starting Ollama server..."
 	ollama serve
+
+start: ollama_start
