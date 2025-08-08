@@ -1,4 +1,4 @@
-from lib.string_functions import sanitize_llm_output
+
 from src.llm.agents.agent import Agent
 from src.llm.agents.enums import CMR_QUERY_INTENTION_ENUM
 from src.llm.agents.knowledge_graph import KnowledgeGraph
@@ -6,10 +6,8 @@ from src.llm.workflow.agent_state import AgentState
 
 
 class QueryInterpretationAndValidationAgent(Agent):
-    def _invoke(self, query: str) -> str:
-        return self.llm.invoke(query)
 
-    def _get_query_intent(self, query: str) -> CMR_QUERY_INTENTION_ENUM | None:
+    def _get_query_intent(self, query: str) -> int | None:
         _prompt = f"""Classify the following query into one of these categories:
         1. Exploratory request
         2. Specific data request
@@ -23,21 +21,21 @@ class QueryInterpretationAndValidationAgent(Agent):
             raise ValueError(
                 "QueryInterpretationAndValidationAgent._get_query_intent() - LLM returned None"
             )
-        _sanitized_llm_output = sanitize_llm_output(_llm_output)
         try:
-            _llm_output_as_integer = int(_sanitized_llm_output)
-            _llm_output_as_enum = CMR_QUERY_INTENTION_ENUM(_llm_output_as_integer)
-            return _llm_output_as_enum
+            _llm_output_as_integer = int(_llm_output)
+            return _llm_output_as_integer
         except (ValueError, TypeError) as e:
             print(
                 f"QueryInterpretationAndValidationAgent._get_query_intent() - Error: {e}"
             )
 
     def _enrich_query_with_context(self, state: AgentState) -> str:
-        _context_manager = state.context
-        _relevant_context = _context_manager.get_relevant_context(
-            state.query, state.intent
-        )
+        # TODO: Add context management here
+        # _context_manager = state.context
+        # _relevant_context = _context_manager.get_relevant_context(
+        #     state.query, state.intent
+        # )
+        _relevant_context = state.query
         return f"{state.query}\n\nRelevant context: {_relevant_context}"
 
     def _identify_sub_queries(self, query: str) -> list[str]:

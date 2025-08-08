@@ -1,7 +1,7 @@
 import asyncio
 import json
 from dataclasses import asdict, dataclass, field, fields
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 import aiohttp
@@ -13,10 +13,23 @@ from config import Configuration
 # NOTE: I think this was a bit overengineered. In the beginning it was tough to understand the structure of the CMR API.
 
 
-class CMR_ENDPOINTS(Enum):
+class CMR_ENDPOINTS(StrEnum):
     AUTOCOMPLETE = "autocomplete"
     COLLECTIONS = "collections"
     GRANULES = "granules"
+
+    @staticmethod
+    def get_item_from_index(index) -> str | None:
+        try:
+            return list(CMR_ENDPOINTS)[index - 1]
+        except IndexError as e:
+            print(f"CMR_ENDPOINTS.get_item_from_index() - IndexError: {e}")
+
+    def __str__(self) -> str:
+        return self.value
+
+    def __repr__(self) -> str:
+        return self.value
 
 
 # NOTE: Using "dataclass" instead of Pydantic here to avoid additional overhead.
@@ -130,7 +143,7 @@ class APIManager:
             print(f"APIManager.async_get_request() - Exception: {e}")
 
     @staticmethod
-    async def query_cmr(endpoint: CMR_ENDPOINTS, params: dict[str, Any] = {}, **kwargs):
+    async def query_cmr(endpoint: CMR_ENDPOINTS | str, params: dict[str, Any] = {}, **kwargs):
         _params: dict[str, Any] = params
         if _params.get("page_size") is None:
             _params = {
@@ -138,7 +151,7 @@ class APIManager:
                 "page_size": 10,
             }  # TODO: Fix this. It's really badly written and just done to brute force the LLM to work.
         _base_url = Configuration.base_endpoint
-        _url = f"{_base_url}{endpoint.value}.json"
+        _url = f"{_base_url}{endpoint.value}.json" # TODO: Fix error here.
         _response = await APIManager.get_request(_url, params=_params)
         if _response is not None:
             _return_value: Any = _response

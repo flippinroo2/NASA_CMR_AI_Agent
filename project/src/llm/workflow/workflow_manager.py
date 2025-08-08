@@ -6,7 +6,6 @@ from langgraph.graph import StateGraph
 
 from config import Configuration
 from lib.file_functions import write_dictionary_to_file, write_string_to_file
-from lib.string_functions import sanitize_llm_output
 from lib.time_functions import get_timestamp
 from src.llm.agents.cmr_api_agent import CMRApiAgent
 from src.llm.agents.query_interpretation_and_validation_agent import (
@@ -15,7 +14,7 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
 from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
 
-from langgraph.checkpoint import MemorySaver
+from langgraph.checkpoint.memory import MemorySaver
 
 class WorkflowManager:
     workflow: StateGraph = StateGraph(AgentState)
@@ -83,9 +82,9 @@ class WorkflowManager:
             f"{Configuration.log_folder_path}/{_curent_timestamp}/state.json",
             dict(state),
         )
-        _pretty_text: str = pformat(state, indent=2, width=80, sort_dicts=False)
-        _sanitized_output = sanitize_llm_output(_pretty_text)
-        write_string_to_file(
-            f"{Configuration.log_folder_path}/{_curent_timestamp}/state.txt",
-            _sanitized_output,
-        )
+        # _pretty_text: str = pformat(state, indent=2, width=80, sort_dicts=False)
+        # _sanitized_output = sanitize_llm_output(_pretty_text)
+        # write_string_to_file(
+        #     f"{Configuration.log_folder_path}/{_curent_timestamp}/state.txt",
+        #     _sanitized_output,
+        # )

@@ -8,7 +8,7 @@ class DataAnalysisAndRecommendationAgent(Agent):
         return self.llm.invoke(query)
 
     def process(self, state: AgentState) -> AgentState:
-        _query: str | None = state.get("query")
+        _query: str | None = state.query
         if _query is None:
             raise ValueError(
                 "WorkflowManager.intent_classifier - There was no query in AgentState"

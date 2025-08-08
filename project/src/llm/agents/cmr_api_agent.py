@@ -3,14 +3,9 @@ import time
 
 import httpx
 
-from lib.string_functions import sanitize_llm_output
 from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
 from src.llm.workflow.agent_state import AgentState
-
-
-
-
 
 
 class CMRApiAgent(Agent):
@@ -18,12 +13,9 @@ class CMRApiAgent(Agent):
         super().__init__(llm)
         self.session = httpx.AsyncClient()
 
-    def _invoke(self, query: str):
-        return self.llm.invoke(query)
-
     async def process(self, state: AgentState):
         _query_intent = state.intent
-        _sub_queries = state.sub_queries # TODO: Check if the list contains entries before moving forward
+        _sub_queries = state.sub_queries
         if len(_sub_queries):
             _cmr_queries = self._build_cmr_requests_from_subqueries(
                 _sub_queries, _query_intent
@@ -44,6 +36,7 @@ class CMRApiAgent(Agent):
 
     def _build_cmr_request_from_query(self, query, query_intent):
         # TODO: Expand this function here to actually handle parameters better.
+        _endpoint = CMR_ENDPOINTS.get_item_from_index(query_intent)
         _query_parameters = self._build_cmr_request_parameters(query, query_intent)
         _api_query = APIManager.query_cmr(
             CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": _query_parameters}
@@ -66,10 +59,26 @@ class CMRApiAgent(Agent):
         return response
 
     def _build_cmr_request_parameters(self, query, query_intent):
-        _prompt = f"""Here is a query: {query}
+        # TODO: Actually make this do something...
+        match query_intent:
+            case 1:
+                _prompt = f"""Here is a query: {query}
         Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
         ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
+            case 2:
+                _prompt = f"""Here is a query: {query}
+        Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
+
+        ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
+            case 3:
+                _prompt = f"""Here is a query: {query}
+          Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
+
+          ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
+            case _:
+                raise ValueError(
+                    f"CMRApiAgent._build_cmr_request_parameters() - Invalid query intent: {query_intent}"
+                )
         _llm_response = self._invoke(_prompt)
-        _return_value = sanitize_llm_output(_llm_response)
-        return _return_value
+        return _llm_response
