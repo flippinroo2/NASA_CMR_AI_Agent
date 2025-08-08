@@ -15,78 +15,78 @@
       "type": "bind"
     },
     {
-      "source": "../.vscode",
-      "target": "/home/vscode/.vscode",
-      "type": "bind"
-    },
-    {
       "source": "../project/llm_examples",
-      "target": "/home/vscode/development/llm_examples",
+      "target": "/home/vscode/project/llm_examples",
       "type": "bind"
     },
     {
       "source": "../project/lib",
-      "target": "/home/vscode/development/lib",
+      "target": "/home/vscode/project/lib",
       "type": "bind"
     },
     {
       "source": "../project/src",
-      "target": "/home/vscode/development/src",
+      "target": "/home/vscode/project/src",
       "type": "bind"
     },
     {
       "source": "../project/tests",
-      "target": "/home/vscode/development/tests",
+      "target": "/home/vscode/project/tests",
+      "type": "bind"
+    },
+    {
+      "source": "../project/__init__.py",
+      "target": "/home/vscode/project/__init__.py",
       "type": "bind"
     },
     {
       "source": "../project/__main__.py",
-      "target": "/home/vscode/development/__main__.py",
+      "target": "/home/vscode/project/__main__.py",
       "type": "bind"
     },
     {
       "source": "../project/.env.example",
-      "target": "/home/vscode/development/.env.example",
+      "target": "/home/vscode/project/.env.example",
       "type": "bind"
     },
     {
       "source": "../.gitignore",
-      "target": "/home/vscode/development/.gitignore",
+      "target": "/home/vscode/project/.gitignore",
       "type": "bind"
     },
     {
       "source": "../project/config.py",
-      "target": "/home/vscode/development/config.py",
+      "target": "/home/vscode/project/config.py",
       "type": "bind"
     },
     {
       "source": "../project/config.yaml",
-      "target": "/home/vscode/development/config.yaml",
+      "target": "/home/vscode/project/config.yaml",
       "type": "bind"
     },
     {
       "source": "../project/Makefile",
-      "target": "/home/vscode/development/Makefile",
+      "target": "/home/vscode/project/Makefile",
       "type": "bind"
     },
     {
       "source": "../project/poetry.toml",
-      "target": "/home/vscode/development/poetry.toml",
+      "target": "/home/vscode/project/poetry.toml",
       "type": "bind"
     },
     {
       "source": "../project/pyproject.toml",
-      "target": "/home/vscode/development/pyproject.toml",
+      "target": "/home/vscode/project/pyproject.toml",
       "type": "bind"
     },
     {
       "source": "../project/README.md",
-      "target": "/home/vscode/development/README.md",
+      "target": "/home/vscode/project/README.md",
       "type": "bind"
     },
     {
       "source": "../prompts",
-      "target": "/home/vscode/development/prompts",
+      "target": "/home/vscode/project/prompts",
       "type": "bind"
     }
   ]

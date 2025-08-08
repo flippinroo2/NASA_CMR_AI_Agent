@@ -19,6 +19,16 @@ aiohttp = "^3.12.15"
 neo4j = "^5.28.2"
 sentence-transformers = "^5.1.0"
 langchain-ollama = "^0.3.6"
+langchain-deepseek = "^0.1.4"
+langchain-nvidia-ai-endpoints = "^0.3.14"
+langchain-huggingface = "^0.3.1"
+langchain-mistralai = "^0.2.11"
+langchain-aws = "^0.2.30"
+langchain-google-genai = "^2.1.9"
+langchain-openai = "^0.3.28"
+langchain-anthropic = "^0.3.18"
+langchain-perplexity = "^0.1.2"
+langchain-xai = "^0.2.5"
 
 [tool.poetry.group.core]
 optional = false
@@ -32,15 +42,19 @@ optional = true
 [tool.poetry.group.debug.dependencies]
 debugpy = "^1.8.1"
 
+[tool.pylint.messages_control]
+disable = ["shadowed-imports"]
+
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md
-useLibraryCodeForTypes = true
 exclude = [".cache"]
+reportShadowedImports = false
+useLibraryCodeForTypes = true
 
 [tool.ruff.lint]
 # https://beta.ruff.rs/docs/configuration/
 select = ['E', 'W', 'F', 'I', 'B', 'C4', 'ARG', 'SIM']
-ignore = ['E501', 'W291', 'W292', 'W293']
+ignore = ['F401', 'E501', 'W291', 'W292', 'W293']
 
 [build-system]
 requires = ["poetry-core"]

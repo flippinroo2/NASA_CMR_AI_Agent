@@ -21,3 +21,7 @@ nuke: clean
 
 reinstall: nuke install
 	@echo "Reinstalled..."
+
+test:
+	@echo "Testing NASA CMR AI Agent..."
+	python -m unittest discover -s tests

@@ -2,13 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/project"
+      },
+      "cwd": "${workspaceFolder}/project",
+      "python": "${workspaceFolder}/project/.venv/bin/python",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "NASA CMR AI Agent - __main__.py",
       "type": "debugpy",
       "request": "launch",
       "preLaunchTask": "Ollama - Pull gemma3:latest",
-      "cwd": "${workspaceFolder}/development",
-      "python": "${workspaceFolder}/development/.venv/bin/python",
-      "program": "${workspaceFolder}/development/__main__.py",
+      "python": "${workspaceFolder}/project/.venv/bin/python",
+      "program": "${workspaceFolder}/project/__main__.py",
       "console": "integratedTerminal",
       "justMyCode": false
     },
@@ -17,12 +29,28 @@
       "type": "debugpy",
       "request": "launch",
       "preLaunchTask": "Ollama - Pull gemma3:latest",
-      "cwd": "${workspaceFolder}/development",
-      "python": "${workspaceFolder}/development/.venv/bin/python",
+      "python": "${workspaceFolder}/project/.venv/bin/python",
       "console": "integratedTerminal",
       "module": "uvicorn",
       "args": [
-        "__init__:app",
+        "project/__init__:app",
+      ],
+      "justMyCode": false
+    },
+    {
+      // TODO: Enable breakpoints on errors / failed tests
+      "name": "NASA CMR AI Agent - Run Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "preLaunchTask": "Ollama - Pull gemma3:latest",
+      "cwd": "${workspaceFolder}/project",
+      "python": "${workspaceFolder}/project/.venv/bin/python",
+      "console": "integratedTerminal",
+      "module": "unittest",
+      "args": [
+        "discover",
+        "-s",
+        "tests"
       ],
       "justMyCode": false
     }

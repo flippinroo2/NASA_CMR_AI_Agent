@@ -6,6 +6,15 @@
       "type": "shell",
       "command": "ollama pull gemma3:latest",
       "hide": true
+    },
+    {
+      "label": "Unit Tests - Run",
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}/project"
+      },
+      "command": "make test",
+      "hide": true
     }
   ]
 }

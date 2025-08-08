@@ -1,33 +1,57 @@
 from enum import Enum
+from typing import Any
 
-from langchain_community.llms.anthropic import Anthropic
-from langchain_community.llms.openai import OpenAI
+from langchain.chat_models import init_chat_model
+from langchain.chat_models.base import _ConfigurableModel
+from langchain_core.language_models import BaseLLM
 from langchain_ollama.llms import OllamaLLM
 
 
 class LLM_PROVIDER_ENUM(Enum):
     ANTHROPIC = "anthropic"
+    BEDROCK = "bedrock"
+    BEDROCK_CONVERSE = "bedrock_converse"
+    DEEPSEEK = "deepseek"
+    GOOGLE = "google"
+    GROQ = "groq"
+    HUGGING_FACE = "huggingface"
     LM_STUDIO = "lmstudio"
+    MISTRAL = "mistralai"
+    NVIDIA = "nvidia"
     OLLAMA = "ollama"
+    OPEN_AI = "openai"
+    PERPLEXITY = "perplexity"
+    XAI = "xai"
 
 
 class LLMProvider:
-    llm_class = OllamaLLM
+    _llm_class = None
+    llm: BaseLLM | _ConfigurableModel | None = None
 
     def __init__(self, llm_provider: LLM_PROVIDER_ENUM):
-        match llm_provider:
-            case LLM_PROVIDER_ENUM.ANTHROPIC:
-                self.llm_class = Anthropic
-            case LLM_PROVIDER_ENUM.LM_STUDIO:
-                self.llm_class = OpenAI
-            case LLM_PROVIDER_ENUM.OLLAMA:
-                self.llm_class = OllamaLLM
-            case _:
-                self.llm_class = OllamaLLM
+        if llm_provider == LLM_PROVIDER_ENUM.OLLAMA:
+            self._llm_class = OllamaLLM
 
     # TODO: Remove hard-coded LLM name
-    def get_llm(self, model_name="gemma3:latest"):
+    def get_llm(
+        self, model_name="gemma3:latest"
+    ) -> _ConfigurableModel | OllamaLLM | Any | None:
+        if self.llm is not None:
+            return self.llm
+        if self._llm_class is None:
+            self.llm = self._get_dynamic_llm(model_name)
+        else:
+            try:
+                self.llm = self._llm_class(model=model_name)
+            except Exception as e:
+                print(f"LLMProvider.get_llm() - Exception: {e}")
+        return self.llm
+
+    def _get_dynamic_llm(self, model_name) -> _ConfigurableModel | None:
         try:
-            return self.llm_class(model=model_name)
+            return init_chat_model(model_name=model_name)
         except Exception as e:
-            print(f"LLMProvider.get_llm() - Exception: {e}")
+            print(f"LLMProvider._get_dynamic_llm() - Exception: {e}")
+
+    def set_llm(self, llm) -> None:
+        self.llm = llm
