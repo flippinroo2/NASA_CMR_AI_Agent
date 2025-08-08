@@ -12,8 +12,8 @@ class __AgentState:
     query: str
     # analysis_results: dict[str, Any] = field(default_factory=dict[str, Any])
     api_requests: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
-    api_responses: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
-    context: ContextManager = ContextManager()
+    api_responses: list[list[dict[str, Any]]] = field(default_factory=list[list[dict[str, Any]]])
+    context: ContextManager = field(default_factory=ContextManager)
     current_task: Optional[str] = None
     final_response: Optional[str] = None
     intent: Optional[CMR_QUERY_INTENTION_ENUM] = None
@@ -25,7 +25,7 @@ class __AgentState:
 class _AgentState(TypedDict):
     # analysis_results: NotRequired[dict[str, Any]]
     api_requests: NotRequired[list[dict[str, Any]]]
-    api_responses: NotRequired[list[dict[str, Any]]]
+    api_responses: NotRequired[list[list[dict[str, Any]]]]
     context: ContextManager
     current_task: NotRequired[str]
     final_response: NotRequired[str]
@@ -40,7 +40,7 @@ class AgentState(BaseModel):
     query: str
     # analysis_results: dict[str, Any]
     api_requests: list[dict[str, Any]] = Field(default_factory=list[dict[str, Any]])
-    api_responses: list[dict[str, Any]] = Field(default_factory=list[dict[str, Any]])
+    api_responses: list[list[dict[str, Any]]] = Field(default_factory=list[list[dict[str, Any]]])
     context: ContextManager = Field(default_factory=ContextManager)
     current_task: Optional[str] = Field(default=None)
     final_response: Optional[str] = Field(default=None)

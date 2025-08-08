@@ -1,13 +1,6 @@
 DEBUG: True
 ENABLE_STREAMING: True
 HOST: "0.0.0.0"
-LLM_PROVIDERS:
-  [
-    { anthropic: "langchain_anthropic.ChatAnthropic" },
-    { google: "langchain_google.ChatGoogleGenerativeAI" },
-    { mistral: "langchain_mistral.ChatMistralAI" },
-    { openai: "langchain_openai.ChatOpenAI" },
-  ]
 LOG_FOLDER_PATH: "project/logs"
 MAX_CONCURRENT_REQUESTS: 10
 PORT: 5050

@@ -15,6 +15,7 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
 from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
 
+from langgraph.checkpoint import MemorySaver
 
 class WorkflowManager:
     workflow: StateGraph = StateGraph(AgentState)
@@ -25,16 +26,16 @@ class WorkflowManager:
         # Add nodes
         self.workflow.add_node(
             "query_interpretation_and_validation_agent",
-            self.query_interpretation_and_validation_agent,
+            self._query_interpretation_and_validation_agent,
         )
-        self.workflow.add_node("cmr_api_agent", self.cmr_api_agent)
+        self.workflow.add_node("cmr_api_agent", self._cmr_api_agent)
         self.workflow.add_node(
             "data_analysis_and_recommendation_agent",
-            self.data_analysis_and_recommendation_agent,
+            self._data_analysis_and_recommendation_agent,
         )
         self.workflow.add_node(
             "response_synthesis_and_formatting_agent",
-            self.response_synthesis_and_formatting_agent,
+            self._response_synthesis_and_formatting_agent,
         )
 
         # Define edges
@@ -52,24 +53,28 @@ class WorkflowManager:
         # Set entry point
         self.workflow.set_entry_point("query_interpretation_and_validation_agent")
 
-    def query_interpretation_and_validation_agent(
+    def checkpoint(self):
+      self.workflow.compile(
+          checkpointer=MemorySaver()
+      )
+    def _query_interpretation_and_validation_agent(
         self, state: AgentState
     ) -> AgentState:
         return QueryInterpretationAndValidationAgent(self.llm).process(state)
 
-    def cmr_api_agent(self, state: AgentState) -> AgentState:
+    def _cmr_api_agent(self, state: AgentState) -> AgentState:
         _response = asyncio.run(CMRApiAgent(self.llm).process(state))
-        return {**state, **_response}  # TODO: Figure out how to cast this to AgentState
+        return {**state.model_dump(), **_response}  # TODO: Figure out how to cast this to AgentState
 
-    def data_analysis_and_recommendation_agent(self, state: AgentState) -> AgentState:
+    def _data_analysis_and_recommendation_agent(self, state: AgentState) -> AgentState:
         self._log_workflow_state(state)  # TODO: Remove logging statement here
-        _api_responses: list[dict[str, Any]] | None = state.get("api_responses")
+        _api_responses: list[dict[str, Any]] | None = state.api_responses
         if _api_responses is not None:
             for _api_response in _api_responses:
                 print("DEBUG")
         return state
 
-    def response_synthesis_and_formatting_agent(self, state: AgentState) -> AgentState:
+    def _response_synthesis_and_formatting_agent(self, state: AgentState) -> AgentState:
         return state
 
     def _log_workflow_state(self, state: AgentState) -> None:

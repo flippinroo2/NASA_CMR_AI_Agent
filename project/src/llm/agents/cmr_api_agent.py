@@ -11,71 +11,39 @@ from src.llm.workflow.agent_state import AgentState
 
 
 
-# This is for failure detection
-class CircuitBreaker:
-    def __init__(self, failure_threshold, recovery_timeout):
-        self.failure_count = 0
-        self.last_failure = None
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.state = "closed"
-
-    def protect(self, func):
-        async def wrapper(*args, **kwargs):
-            if self.state == "open":
-                raise Exception("ServiceUnavailableError")
-            try:
-                result = await func(*args, **kwargs)
-                self.state = "closed"
-                return result
-            except Exception:
-                self._record_failure()
-                raise
-
-        return wrapper
-
-    def _record_failure(self):
-        self.failures += 1
-        self.last_failure = time.time()
-        if self.failures >= self.failure_threshold:
-            self.state = "open"
 
 
 class CMRApiAgent(Agent):
     def __init__(self, llm):
         super().__init__(llm)
-        self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
         self.session = httpx.AsyncClient()
 
     def _invoke(self, query: str):
         return self.llm.invoke(query)
 
     async def process(self, state: AgentState):
-        _query_intent = state.get(
-            "intent", 1
-        )  # NOTE: Setting to EXPLORATORY for now because it's the most generic??? (OR do we maybe want intent to be for each sub-query???!!!)
-        _sub_queries = state.get(
-            "sub_queries", []
-        )  # TODO: Check if the list contains entries before moving forward
-
-        _cmr_queries = self._build_cmr_requests_from_subqueries(
-            _sub_queries, _query_intent
-        )
-        _results = await asyncio.gather(*_cmr_queries)
-        _cleaned_results = [_result for _result in _results if _result]
-        return {**state, "api_responses": _cleaned_results}
+        _query_intent = state.intent
+        _sub_queries = state.sub_queries # TODO: Check if the list contains entries before moving forward
+        if len(_sub_queries):
+            _cmr_queries = self._build_cmr_requests_from_subqueries(
+                _sub_queries, _query_intent
+            )
+            _results = await asyncio.gather(*_cmr_queries)
+            _cleaned_results = [_result for _result in _results if _result]
+            return {**state.model_dump(), "api_responses": _cleaned_results}
+        return {**state.model_dump(), "api_responses": []}
 
     def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
         _return_value = []
         for _query in subqueries:
             _return_value.append(
-                # self.circuit_breaker.protect(self._fetch_data)(_query)
                 self._build_cmr_request_from_query(_query, query_intent)
             )
         return _return_value
 
     def _build_cmr_request_from_query(self, query, query_intent):
+        # TODO: Expand this function here to actually handle parameters better.
         _query_parameters = self._build_cmr_request_parameters(query, query_intent)
         _api_query = APIManager.query_cmr(
             CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": _query_parameters}
@@ -105,11 +73,3 @@ class CMRApiAgent(Agent):
         _llm_response = self._invoke(_prompt)
         _return_value = sanitize_llm_output(_llm_response)
         return _return_value
-
-    # @circuit_breaker.protect # TODO: Make this decorator work by using the circuit breaker attached to this object
-    async def _fetch_data(self, query):
-        params = self._build_cmr_request_parameters(query)
-        response = await self.session.get(
-            "https://cmr.earthdata.nasa.gov/search", params=params, timeout=30
-        )
-        return response.json()

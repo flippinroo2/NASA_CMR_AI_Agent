@@ -52,7 +52,7 @@ class Configuration:
     log_folder_path: ClassVar[str] = "logs"
     max_concurrent_requests: ClassVar[int] = 10
     port: ClassVar[int] = 5050
-    prompt_folder_path: ClassVar[str] = "prompts"
+    prompt_folder_path: ClassVar[str] = "project/prompts"
     request_timeout: ClassVar[int] = 30
     stream_chunk_size: ClassVar[int] = 10
 

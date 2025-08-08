@@ -62,4 +62,4 @@ class QueryInterpretationAndValidationAgent(Agent):
         _enriched_query = self._enrich_query_with_context(state)
         _intent = self._get_query_intent(_enriched_query)
         sub_queries = self._identify_sub_queries(_enriched_query)
-        return {**state, "intent": _intent, "sub_queries": sub_queries}
+        return {**state.model_dump(), "intent": _intent, "sub_queries": sub_queries}
