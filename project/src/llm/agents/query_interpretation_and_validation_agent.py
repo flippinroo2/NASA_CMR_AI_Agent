@@ -33,10 +33,12 @@ class QueryInterpretationAndValidationAgent(Agent):
                 f"QueryInterpretationAndValidationAgent._get_query_intent() - Error: {e}"
             )
 
-    def _enrich_query_with_context(self, query: str, intent: int) -> str:
-        """Add relevant context from conversation history"""
-        context = self.context_manager.get_relevant_context(query, intent)
-        return f"{query}\n\nRelevant context: {context}"
+    def _enrich_query_with_context(self, state: AgentState) -> str:
+        _context_manager = state.context
+        _relevant_context = _context_manager.get_relevant_context(
+            state.query, state.intent
+        )
+        return f"{state.query}\n\nRelevant context: {_relevant_context}"
 
     def _identify_sub_queries(self, query: str) -> list[str]:
         _prompt = f"""Break this complex query into simpler sub-queries:
@@ -52,7 +54,7 @@ class QueryInterpretationAndValidationAgent(Agent):
         return _identified_subqueries
 
     def process(self, state: AgentState) -> AgentState:
-        _query: str | None = state.get("query")
+        _query: str = state.query
         if _query is None:
             raise ValueError(
                 "WorkflowManager.intent_classifier - There was no query in AgentState"

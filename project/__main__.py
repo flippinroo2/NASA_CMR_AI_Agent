@@ -23,10 +23,7 @@ app = FastAPI()  # This is used to enable concurrent handling of requests.
 
 async def create_workflow(*args, **kwargs):
     llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
-    workflow_manager = WorkflowManager(
-        llm_provider
-    )  # TODO: We only want this to run once for the entire application and not every time we query.
-
+    workflow_manager = WorkflowManager(llm_provider)
     compiled_workflow = workflow_manager.workflow.compile()
     return compiled_workflow
 
@@ -76,7 +73,9 @@ if __name__ == "__main__":
         for text_file in text_files:
             text_file_content: str = read_file_as_text_string(text_file)
             # test_agent_query = asyncio.run(query_agents(text_file_content))
-            workflow_result = workflow.invoke(AgentState({"query": text_file_content}))
+            workflow_result = workflow.invoke(
+                AgentState(**{"query": text_file_content})
+            )
         print("END")
     else:
         uvicorn.run(app, host=Configuration.host, port=Configuration.port)

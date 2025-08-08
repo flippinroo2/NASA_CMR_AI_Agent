@@ -29,6 +29,8 @@ langchain-openai = "^0.3.28"
 langchain-anthropic = "^0.3.18"
 langchain-perplexity = "^0.1.2"
 langchain-xai = "^0.2.5"
+pytest = "^8.4.1"
+pydantic = "^2.11.7"
 
 [tool.poetry.group.core]
 optional = false
