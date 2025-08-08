@@ -8,10 +8,12 @@ LLM_PROVIDERS:
     { mistral: "langchain_mistral.ChatMistralAI" },
     { openai: "langchain_openai.ChatOpenAI" },
   ]
+LOG_FOLDER_PATH: "project/logs"
 MAX_CONCURRENT_REQUESTS: 10
 PORT: 5050
 PRODUCTION_MODE: False
 PRODUCTION_ENDPOINT: "https://cmr.earthdata.nasa.gov/search/"
+PROMPT_FOLDER_PATH: "project/prompts"
 REQUEST_TIMEOUT: 30
 STREAM_CHUNK_SIZE: 10
 TEST_ENDPOINT: "https://cmr.uat.earthdata.nasa.gov/search/"

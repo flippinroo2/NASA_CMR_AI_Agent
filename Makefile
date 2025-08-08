@@ -8,7 +8,7 @@ all: install ollama_start
 install: ollama_install project_install
 	@echo "Installed devcontainer..."
 
-PROJECT_DIRECTORY:=development/
+PROJECT_DIRECTORY:=project/
 project_install:
 	@echo "Installing..."
 	$(MAKE) -C $(PROJECT_DIRECTORY)

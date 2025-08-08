@@ -17,10 +17,12 @@ class CONFIGURATION_VALUE_ENUM(Enum):
     ENABLE_STREAMING = "is_streaming_enabled"
     HOST = "host"
     LLM_PROVIDERS = "available_llm_providers"
+    LOG_FOLDER_PATH = "log_folder_path"
     MAX_CONCURRENT_REQUESTS = "max_concurrent_requests"
     PORT = "port"
     PRODUCTION_MODE = "is_production_mode_activated"
     PRODUCTION_ENDPOINT = "_production_endpoint"
+    PROMPT_FOLDER_PATH = "prompt_folder_path"
     REQUEST_TIMEOUT = "request_timeout"
     STREAM_CHUNK_SIZE = "stream_chunk_size"
     TEST_ENDPOINT = "_test_endpoint"
@@ -28,8 +30,8 @@ class CONFIGURATION_VALUE_ENUM(Enum):
 
 @dataclass
 class EnvironmentVariableConfiguration:
-    # credentials: str | None = None
-    credentials: str = field()
+    configuration_filepath: str = field()
+    credentials: str | None = None
 
 
 DEBUG: bool = False
@@ -42,13 +44,15 @@ class Configuration:
     _test_endpoint: ClassVar[str] = "https://cmr.uat.earthdata.nasa.gov/search/"
     available_llm_providers: ClassVar[list[dict[str, str]]] = []
     base_endpoint: ClassVar[str] = ""
-    configuration_filepath: ClassVar[str] = "config.yaml"
+    configuration_filepath: ClassVar[str] = "project/config.yaml"
     host: ClassVar[str] = "0.0.0.0"
     is_debug_mode_activated: ClassVar[bool] = False
     is_production_mode_activated: ClassVar[bool] = False
     is_streaming_enabled: ClassVar[bool] = True
+    log_folder_path: ClassVar[str] = "logs"
     max_concurrent_requests: ClassVar[int] = 10
     port: ClassVar[int] = 5050
+    prompt_folder_path: ClassVar[str] = "prompts"
     request_timeout: ClassVar[int] = 30
     stream_chunk_size: ClassVar[int] = 10
 
@@ -122,4 +126,4 @@ class Configuration:
                 return
 
 
-Configuration()  # TODO: Consider putting this back and just calling "import" from other files since there is a multiple __init__ protection in place.
+Configuration()  # NOTE: This is a singleton since there is protection inside the __init__ method to prevent multiple instances from being created.

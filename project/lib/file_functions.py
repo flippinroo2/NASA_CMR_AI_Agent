@@ -4,6 +4,7 @@ from io import TextIOWrapper
 import json
 from lib.json_functions import format_json_string
 from typing import Any
+import yaml
 
 
 class FILE_EXTENSIONS(enum.StrEnum):
@@ -109,6 +110,12 @@ def read_file_as_text_string(filename: str) -> str:
         print(f"Error reading file: {filename}")
         raise exception
 
+def read_yaml_file_as_dictionary(yaml_filepath: str) -> dict[str, Any] | None:
+    try:
+        with open(yaml_filepath, "r") as f:
+            return yaml.safe_load(f)
+    except (FileNotFoundError, yaml.YAMLError) as e:
+        print(f"Error reading {yaml_filepath}: {e}")
 
 def write_dictionary_to_file(
     filename: str, dictionary_to_write: dict[Any, Any]

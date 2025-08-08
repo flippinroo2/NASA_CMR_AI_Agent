@@ -17,8 +17,8 @@
   "workspaceFolder": "/home/vscode",
   "workspaceFolders": [
     {
-      "path": "./development",
-      "name": "development"
+      "path": "./project",
+      "name": "project"
     }
   ],
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode,type=bind,consistency=cached",
@@ -26,7 +26,7 @@
     "--log-level",
     "debug"
   ],
-  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/development",
+  "postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/project",
   "features": {
     "./features/debian/debian_base_packages": {},
     "./features/debian/hardware/nvidia-cuda": {

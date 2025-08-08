@@ -13,20 +13,12 @@ from lib.file_functions import (
     read_file_as_text_string,
 )
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
-from src.llm.agent_manager import AgentManager
-from src.llm.agents.agent_state import AgentState
 from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from src.llm.workflow.agent_state import AgentState
 from src.llm.workflow.workflow_manager import WorkflowManager
 from src.user_interface.gui import create_user_interface
 
 app = FastAPI()  # This is used to enable concurrent handling of requests.
-
-
-async def query_agents(agent_query: str, *args, **kwargs):
-    llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
-    agent_manager = AgentManager(llm_provider)
-    response = agent_manager.process_query(agent_query)
-    return response
 
 
 async def create_workflow(*args, **kwargs):
@@ -66,7 +58,9 @@ async def query_cmr(
         )
 
 
-user_interface: gradio.Blocks = create_user_interface(query_agents, query_cmr)
+user_interface: gradio.Blocks = create_user_interface(
+    lambda *args, **kwargs: None, query_cmr
+)  # TODO: Remove static lambda function
 app = gradio.mount_gradio_app(app, user_interface, path="")
 
 if __name__ == "__main__":
@@ -76,7 +70,7 @@ if __name__ == "__main__":
         #     query_cmr(CMR_ENDPOINTS.COLLECTIONS.name, "MODIS", 10, 1, 0)
         # )
         text_files: list[str] = get_files_by_extension_in_directory(
-            "prompts", "txt"
+            Configuration.prompt_folder_path, "txt"
         )  # NOTE: These are not going to be returned sorted.
         workflow = asyncio.run(create_workflow())
         for text_file in text_files:

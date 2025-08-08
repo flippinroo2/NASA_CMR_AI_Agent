@@ -18,8 +18,6 @@ class ConversationContext:
 
 
 class ContextManager:
-    state = {}  # TODO: Turn this into AgentState object
-
     def __init__(self, max_history_length: int = 50):
         self.max_history_length = max_history_length
         self.context = ConversationContext()
@@ -34,12 +32,12 @@ class ContextManager:
         if intent == "information_retrieval":
             enriched_context = self.enrich_for_information_retrieval(original_query)
             return enriched_context
-        # elif intent == "question_answering":
-        #     print("Question Answering")
-        # elif intent == "query_decomposition":
-        #     print("Query Decomposition")
-        # elif intent == "query_execution":
-        #     print("Query Execution")
+        elif intent == "question_answering":
+            print("Question Answering")
+        elif intent == "query_decomposition":
+            print("Query Decomposition")
+        elif intent == "query_execution":
+            print("Query Execution")
         return original_query  # TODO: Actually enrich with context here
 
     def enrich_for_information_retrieval(self, original_query: str) -> str:

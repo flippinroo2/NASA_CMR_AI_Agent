@@ -1,20 +1,20 @@
-from src.knowledge_graph import KnowledgeGraph
-from src.llm.context_manager import ContextManager
 from src.llm.agents.agent import Agent
+from src.llm.agents.knowledge_graph import KnowledgeGraph
+from src.llm.workflow.agent_state import AgentState
 
 
 class DataAnalysisAndRecommendationAgent(Agent):
-    def invoke(self, query: str):
+    def _invoke(self, query: str):
         return self.llm.invoke(query)
 
-    def process(self, query: str):
-        """Classify query intent using LLM"""
-        prompt = f"""Classify the following query into one of these categories:
-        1. Exploratory request
-        2. Specific data request
-        3. Analytical query
-        4. Comparative analysis
-        5. Methodology recommendation
+    def process(self, state: AgentState) -> AgentState:
+        _query: str | None = state.get("query")
+        if _query is None:
+            raise ValueError(
+                "WorkflowManager.intent_classifier - There was no query in AgentState"
+            )
+        best_datasets = self._determine_best_datasets(_query)
+        return {**state}
 
-        Query: {query}"""
-        return self.llm.invoke(prompt)
+    def _determine_best_datasets(self, query: str) -> list[str]:
+        return self.knowledge_graph.get_best_datasets(query)
