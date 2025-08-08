@@ -17,11 +17,9 @@ from src.llm.workflow.agent_state import AgentState
 
 
 class WorkflowManager:
-    workflow = StateGraph(AgentState)
+    workflow: StateGraph = StateGraph(AgentState)
 
-    def __init__(self, llm_provider: LLMProvider):
-        self.llm = llm_provider.get_llm()
-
+    def __init__(self):
         # Add nodes
         self.workflow.add_node(
             "query_interpretation_and_validation_agent",

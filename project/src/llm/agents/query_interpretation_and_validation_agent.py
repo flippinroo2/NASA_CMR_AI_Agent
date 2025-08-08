@@ -33,8 +33,9 @@ class QueryInterpretationAndValidationAgent(Agent):
                 f"QueryInterpretationAndValidationAgent._get_query_intent() - Error: {e}"
             )
 
-    def _enrich_query_with_context(self, query: str, intent: int) -> str:
-        """Add relevant context from conversation history"""
+    def _enrich_query_with_context(self, state: AgentState) -> str:
+        _query: str | None = state.get("query")
+        _context_manager = state.get("context")
         context = self.context_manager.get_relevant_context(query, intent)
         return f"{query}\n\nRelevant context: {context}"
 
