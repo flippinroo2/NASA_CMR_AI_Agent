@@ -1,4 +1,8 @@
 {
   "explorer.autoReveal": true,
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportShadowImports": "none",
+    "shadowedImport": "none"
+  }
 }
