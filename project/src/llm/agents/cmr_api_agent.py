@@ -2,12 +2,12 @@ import asyncio
 import time
 
 import httpx
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate, PromptTemplate
 
 from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
 from src.llm.workflow.agent_state import AgentState
-from langchain.core.m
+
 
 class CMRApiAgent(Agent):
     def __init__(self, llm):
@@ -50,8 +50,7 @@ class CMRApiAgent(Agent):
         Query: {query}"""
         prompt = ChatPromptTemplate.from_template(template)
         chain = self.get_llm() | prompt
-        language_model_input = LanguageModelInput.from_template(prompt, {"query": query})
-        response = chain.invoke(language_model_input)
+        response = chain.invoke({"query": prompt})
         print(response)
         return response
 
