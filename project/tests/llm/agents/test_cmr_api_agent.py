@@ -1,4 +1,6 @@
+import asyncio
 import unittest
+from typing import Any
 
 import pytest
 
@@ -9,7 +11,69 @@ from src.llm.workflow.agent_state import AgentState
 
 
 class TestCMRApiAgent(unittest.TestCase):
-    test_query = "Why do you think 2024 had such powerful storms towards the end of the year?"  # TODO: Load the json file with test cases instead of using this hard coded string here.
+    test_query: str = "Why do you think 2024 had such powerful storms towards the end of the year?"  # TODO: Load the json file with test cases instead of using this hard coded string here.
+    mock_response: list[dict[str, Any]] = [
+        {
+            "score": 11.292702,
+            "type": "science_keywords",
+            "value": "Storms",
+            "fields": "Atmosphere:Atmospheric Phenomena:Storms",
+        },
+        {
+            "score": 10.4967785,
+            "type": "science_keywords",
+            "value": "Wind Storms",
+            "fields": "Atmosphere:Weather Events:Wind Storms",
+        },
+        {
+            "score": 9.457564,
+            "type": "science_keywords",
+            "value": "Hail Storms",
+            "fields": "Atmosphere:Weather Events:Hail Storms",
+        },
+        {
+            "score": 9.398698,
+            "type": "science_keywords",
+            "value": "Ice Storms",
+            "fields": "Atmosphere:Weather Events:Ice Storms",
+        },
+        {
+            "score": 9.398698,
+            "type": "science_keywords",
+            "value": "Snow Storms",
+            "fields": "Atmosphere:Weather Events:Snow Storms",
+        },
+        {
+            "score": 9.3680105,
+            "type": "instrument",
+            "value": "R2Sonic 2024",
+            "fields": "R2Sonic 2024",
+        },
+        {
+            "score": 8.260969,
+            "type": "science_keywords",
+            "value": "Rain Storms",
+            "fields": "Atmosphere:Weather Events:Rain Storms",
+        },
+        {
+            "score": 7.1282506,
+            "type": "science_keywords",
+            "value": "Severe Cyclonic Storms",
+            "fields": "Human Dimensions:Natural Hazards:Tropical Cyclones:Severe Cyclonic Storms",
+        },
+        {
+            "score": 6.985186,
+            "type": "science_keywords",
+            "value": "Severe Cyclonic Storms (N. Indian)",
+            "fields": "Atmosphere:Weather Events:Tropical Cyclones:Tropical Cyclone Force Wind Extent:Severe Cyclonic Storms (N. Indian)",
+        },
+        {
+            "score": 5.8516717,
+            "type": "science_keywords",
+            "value": "Severe Cyclonic Storms (N. Indian)",
+            "fields": "Atmosphere:Weather Events:Tropical Cyclones:Landfall Intensity:Severe Cyclonic Storms (N. Indian)",
+        },
+    ]
 
     def setUp(self):
         llm = LLMProvider(LLM_PROVIDER.OLLAMA).get_llm()
@@ -20,16 +84,30 @@ class TestCMRApiAgent(unittest.TestCase):
         response = None
 
         def test_query_intent_1(self) -> None:
-            response = self.agent._build_cmr_request_from_query(self.test_query, 1)
+            response = asyncio.run(
+                self.agent._build_cmr_request_from_query(self.test_query, 1)
+            )
+            assert isinstance(response, list)
+            assert all(isinstance(sub_response, dict) for sub_response in response)
             print("DEBUG")
+
+        test_query_intent_1(self)
 
         def test_query_intent_2(self) -> None:
-            response = self.agent._build_cmr_request_from_query(self.test_query, 2)
+            response = asyncio.run(
+                self.agent._build_cmr_request_from_query(self.test_query, 2)
+            )
             print("DEBUG")
 
+        test_query_intent_2(self)
+
         def test_query_intent_3(self) -> None:
-            response = self.agent._build_cmr_request_from_query(self.test_query, 3)
+            response = asyncio.run(
+                self.agent._build_cmr_request_from_query(self.test_query, 3)
+            )
             print("DEBUG")
+
+        test_query_intent_3(self)
 
         self.assertIsNotNone(response)
 
