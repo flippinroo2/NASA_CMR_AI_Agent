@@ -14,11 +14,13 @@ from src.llm.workflow.agent_state import AgentState
 # Abstract Agent class
 class Agent(ABC):
     _llm: _ConfigurableModel | BaseLLM
-    knowledge_graph: KnowledgeGraph
+    knowledge_graph: KnowledgeGraph | None = (
+        None  # TODO: Remove the None and actually implement a knowledge graph
+    )
 
     def __init__(self, llm: _ConfigurableModel | BaseLLM) -> None:
         self._llm = llm
-        self.knowledge_graph = KnowledgeGraph()
+        # self.knowledge_graph = KnowledgeGraph() # TODO: Re-enable knowledge graph
 
     def _invoke(self, query: str) -> str:
         llm_response = self._llm.invoke(query)

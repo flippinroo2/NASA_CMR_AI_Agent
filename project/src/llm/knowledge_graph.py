@@ -5,10 +5,9 @@ from sentence_transformers import SentenceTransformer
 class KnowledgeGraph:
     def __init__(self):
         self.driver = GraphDatabase.driver(
-            "bolt://localhost:7687",
-            auth=("neo4j", "password")
+            "bolt://localhost:7687", auth=("neo4j", "password")
         )
-        self.embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
     def find_related_datasets(self, dataset_id: str, max_results: int = 5):
         """Find datasets related to a given dataset using knowledge graph"""
@@ -20,7 +19,7 @@ class KnowledgeGraph:
                 LIMIT $max_results
                 """,
                 dataset_id=dataset_id,
-                max_results=max_results
+                max_results=max_results,
             )
             return [dict(record) for record in result]
 
@@ -38,7 +37,7 @@ class KnowledgeGraph:
                 LIMIT $max_results
                 """,
                 query_embedding=list(query_embedding),
-                max_results=max_results
+                max_results=max_results,
             )
             return [dict(record) for record in result]
 
@@ -57,7 +56,7 @@ class KnowledgeGraph:
                     id=dataset["id"],
                     title=dataset["title"],
                     description=dataset["description"],
-                    embedding=list(self.embedding_model.encode(dataset["description"]))
+                    embedding=list(self.embedding_model.encode(dataset["description"])),
                 )
 
                 # Create relationships based on shared attributes
@@ -65,28 +64,29 @@ class KnowledgeGraph:
 
     def _create_relationships(self, session, dataset: dict):
         """Create relationships based on dataset attributes"""
-        # Example: Create relationships based on instruments
-        if "instruments" in dataset:
-            for instrument in dataset["instruments"]:
-                session.run(
-                    """
-                    MATCH (d:Dataset {id: $dataset_id})
-                    MERGE (i:Instrument {name: $instrument_name})
-                    MERGE (d)-[:USES_INSTRUMENT]->(i)
-                    """,
-                    dataset_id=dataset["id"],
-                    instrument_name=instrument
-                )
+        with session:
+            # Example: Create relationships based on instruments
+            if "instruments" in dataset:
+                for instrument in dataset["instruments"]:
+                    session.run(
+                        """
+                      MATCH (d:Dataset {id: $dataset_id})
+                      MERGE (i:Instrument {name: $instrument_name})
+                      MERGE (d)-[:USES_INSTRUMENT]->(i)
+                      """,
+                        dataset_id=dataset["id"],
+                        instrument_name=instrument,
+                    )
 
-        # Create relationships based on science keywords
-        if "science_keywords" in dataset:
-            for keyword in dataset["science_keywords"]:
-                session.run(
-                    """
-                    MATCH (d:Dataset {id: $dataset_id})
-                    MERGE (k:Keyword {name: $keyword_name})
-                    MERGE (d)-[:HAS_KEYWORD]->(k)
-                    """,
-                    dataset_id=dataset["id"],
-                    keyword_name=keyword
-                )
+            # Create relationships based on science keywords
+            if "science_keywords" in dataset:
+                for keyword in dataset["science_keywords"]:
+                    session.run(
+                        """
+                      MATCH (d:Dataset {id: $dataset_id})
+                      MERGE (k:Keyword {name: $keyword_name})
+                      MERGE (d)-[:HAS_KEYWORD]->(k)
+                      """,
+                        dataset_id=dataset["id"],
+                        keyword_name=keyword,
+                    )

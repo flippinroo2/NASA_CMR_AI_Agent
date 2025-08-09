@@ -20,7 +20,7 @@ class LLMProvider:
         if llm_provider == LLM_PROVIDER.OLLAMA:
             self._llm_class = OllamaLLM
         if llm_provider == LLM_PROVIDER.LM_STUDIO:
-            self._llm_class = OpenAI
+            self._llm_class = OpenAI  # TODO: Fix this inside the get_llm() function, because an API key must be passed in... Also the other parameters to make it act as if it is an OpenAI LLM
 
     # TODO: Remove hard-coded LLM name and fix type safety stuff
     def get_llm(self, model_name="gemma3:latest") -> _ConfigurableModel | BaseLLM:
