@@ -17,12 +17,20 @@ class TestQueryInterpretationAndValidationAgent(unittest.TestCase):
         self.test_state = AgentState(query=self.test_query)
 
     def test_query_intent(self):
-        pass
+        query_intent: int | None = self.agent._get_query_intent(self.test_query)
+        self.assertIsNotNone(query_intent)
+        self.assertIsInstance(query_intent, int)
+        self.assertGreaterEqual(query_intent, 1)
+        self.assertLessEqual(query_intent, 3)
 
     def test_identifying_sub_queries(self):
-        pass
+        response: AgentState = self.agent.process(self.test_state)
+        print("DEBUG: ", response)
 
     def test_process_output(self):
+        """
+        Ensures that the process method returns an AgentState object.
+        """
         response: AgentState = self.agent.process(self.test_state)
         self.assertIsInstance(response, AgentState)
 

@@ -5,6 +5,7 @@ from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _ConfigurableModel
 from langchain_core.language_models import BaseLLM
 from langchain_ollama.llms import OllamaLLM
+from langchain_openai.llms import OpenAI
 
 from src.ENUMS import LLM_PROVIDER
 
@@ -13,11 +14,13 @@ T_BaseLLM = TypeVar("T_BaseLLM", bound=Type[BaseLLM])
 
 class LLMProvider:
     _llm: _ConfigurableModel | BaseLLM | None = None
-    _llm_class: Type[BaseLLM]
+    _llm_class: Type[BaseLLM] = BaseLLM
 
     def __init__(self, llm_provider: LLM_PROVIDER):
         if llm_provider == LLM_PROVIDER.OLLAMA:
             self._llm_class = OllamaLLM
+        if llm_provider == LLM_PROVIDER.LM_STUDIO:
+            self._llm_class = OpenAI
 
     # TODO: Remove hard-coded LLM name and fix type safety stuff
     def get_llm(self, model_name="gemma3:latest") -> _ConfigurableModel | BaseLLM:
