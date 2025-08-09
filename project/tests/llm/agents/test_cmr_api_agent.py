@@ -83,28 +83,43 @@ class TestCMRApiAgent(unittest.TestCase):
     def test_01_test_api_request(self):
         response = None
 
+        @pytest.mark.mypy_testing
         def test_query_intent_1(self) -> None:
+            """
+            query_intent 1 represents a call to the /autocomplete endpoint of the CMR API
+            """
             response = asyncio.run(
                 self.agent._build_cmr_request_from_query(self.test_query, 1)
             )
             assert isinstance(response, list)
             assert all(isinstance(sub_response, dict) for sub_response in response)
-            print("DEBUG")
 
         test_query_intent_1(self)
 
+        @pytest.mark.mypy_testing
         def test_query_intent_2(self) -> None:
+            """
+            query_intent 2 represents a call to the /collections endpoint of the CMR API
+            """
             response = asyncio.run(
                 self.agent._build_cmr_request_from_query(self.test_query, 2)
             )
+            assert isinstance(response, list)
+            assert all(isinstance(sub_response, dict) for sub_response in response)
             print("DEBUG")
 
         test_query_intent_2(self)
 
+        @pytest.mark.mypy_testing
         def test_query_intent_3(self) -> None:
+            """
+            query_intent  represents a call to the /granules endpoint of the CMR API
+            """
             response = asyncio.run(
                 self.agent._build_cmr_request_from_query(self.test_query, 3)
             )
+            assert isinstance(response, list)
+            assert all(isinstance(sub_response, dict) for sub_response in response)
             print("DEBUG")
 
         test_query_intent_3(self)
