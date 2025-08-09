@@ -85,27 +85,6 @@ class CMRSearchParameters:
     standard_product: str | None = field(default=None)
 
 
-# TODO: Consider removing later, but is useful now for helping understand CMR API
-@dataclass
-class CMRQueryParameters:
-    page_size: int = field(default=10)  # Number of results per page
-    page_num: int = field(default=1)  # The page number to return
-    offset: int = field(
-        default=0
-    )  # As an alternative to page_num, a 0-based offset of individual results may be specified.
-    scroll: bool = field(
-        default=False
-    )  # A boolean flag (true/false) that allows all results to be retrieved efficiently. page_size is supported with scroll while page_num and offset are not. If scroll is true then the first call of a scroll session sets the page size; page_size is ignored on subsequent calls
-    sort_key: str | None = field(
-        default=None
-    )  # Indicates one or more fields to sort on
-    pretty: bool = field(default=False)  # Return formatted results if set to true
-    token: str | None = field(
-        default=None
-    )  # Specifies a user token from EDL or Launchpad for use as authentication. Using the standard Authorization header is the prefered way to supply a token. This parameter may be deprecated in the future
-    echo_compatible: bool = field(
-        default=False
-    )  # When set to true results will be returned in an ECHO compatible format. This mostly removes fields and features specific to the CMR such as revision id, granule counts and facets in collection results. Metadata format style results will also use ECHO style names for concept ids such as echo_granule_id and echo_dataset_id.
 
 
 class APIManager:

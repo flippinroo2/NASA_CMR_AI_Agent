@@ -80,11 +80,14 @@ class TestCMRApiAgent(unittest.TestCase):
         self.agent = CMRApiAgent(llm)
         self.test_state = AgentState(query=self.test_query)
 
+    @pytest.mark.skip
     def test_01_building_request_parameters(self):
-        pass
+        response: AgentState = self.agent.process(self.test_state)
+        print("DEBUG")
 
     def test_02_ensure_the_usage_of_tools(self):
-        pass
+        response: AgentState = self.agent.process(self.test_state)
+        print("DEBUG")
 
     @pytest.mark.skip
     def test_03_test_api_request(self):
