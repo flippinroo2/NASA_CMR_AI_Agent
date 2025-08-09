@@ -82,8 +82,11 @@ class Configuration:
             print(
                 f"Attempting to read configuration file from project/{cls.configuration_filepath}..."
             )
+            return read_yaml_file_as_dictionary(
+                f"project/{cls.configuration_filepath}"
+            )  # TODO: Make this a bit more dynamic instead of hard coding.
         return read_yaml_file_as_dictionary(
-            f"project/{cls.configuration_filepath}"
+            "config.yaml"
         )  # TODO: Make this a bit more dynamic instead of hard coding.
 
     @classmethod
