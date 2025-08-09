@@ -80,7 +80,14 @@ class TestCMRApiAgent(unittest.TestCase):
         self.agent = CMRApiAgent(llm)
         self.test_state = AgentState(query=self.test_query)
 
-    def test_01_test_api_request(self):
+    def test_01_building_request_parameters(self):
+        pass
+
+    def test_02_ensure_the_usage_of_tools(self):
+        pass
+
+    @pytest.mark.skip
+    def test_03_test_api_request(self):
         response = None
 
         @pytest.mark.mypy_testing

@@ -37,7 +37,7 @@ class CircuitBreaker:
 # TODO: Create an "args_schema" for the function below
 @tool(
     name_or_callable="send_http_get_request",
-    description="Sends an HTTP GET request to the provided url and returns an HTTP response.",
+    description="Use this tool when you want to send an HTTP GET request.",
     return_direct=True,
     infer_schema=False,
     response_format="content",
