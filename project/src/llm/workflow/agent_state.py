@@ -3,7 +3,7 @@ from typing import Any, NotRequired, Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
-from src.ENUMS import CMR_QUERY_INTENTION_ENUM
+from src.ENUMS import CMR_QUERY_INTENTION
 from src.llm.workflow.context_manager import ContextManager
 
 
@@ -12,7 +12,9 @@ class __AgentState:
     query: str
     # analysis_results: dict[str, Any] = field(default_factory=dict[str, Any])
     api_requests: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
-    api_responses: list[list[dict[str, Any]]] = field(default_factory=list[list[dict[str, Any]]])
+    api_responses: list[list[dict[str, Any]]] = field(
+        default_factory=list[list[dict[str, Any]]]
+    )
     # context: ContextManager = field(default_factory=ContextManager)
     current_task: Optional[str] = None
     final_response: Optional[str] = None
@@ -39,7 +41,9 @@ class _AgentState(TypedDict):
 class AgentState(BaseModel):
     query: str
     api_requests: list[dict[str, Any]] = Field(default_factory=list[dict[str, Any]])
-    api_responses: list[list[dict[str, Any]]] = Field(default_factory=list[list[dict[str, Any]]])
+    api_responses: list[list[dict[str, Any]]] = Field(
+        default_factory=list[list[dict[str, Any]]]
+    )
     current_task: Optional[str] = Field(default=None)
     final_response: Optional[str] = Field(default=None)
     intent: Optional[int] = Field(default=None)

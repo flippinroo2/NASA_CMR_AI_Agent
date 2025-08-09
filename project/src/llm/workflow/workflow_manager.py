@@ -2,8 +2,12 @@ import asyncio
 from pprint import pformat
 from typing import Any, TypedDict
 
+from langchain.chat_models.base import _ConfigurableModel
+from langchain_core.language_models import BaseLLM
+from langchain_ollama.llms import OllamaLLM
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
-
+from src.llm.tools.http import fetch_nasa_data
 from config import Configuration
 from lib.file_functions import write_dictionary_to_file, write_string_to_file
 from lib.time_functions import get_timestamp
@@ -14,13 +18,12 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
 from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
 
-from langgraph.checkpoint.memory import MemorySaver
 
 class WorkflowManager:
     workflow: StateGraph = StateGraph(AgentState)
 
     def __init__(self, llm_provider: LLMProvider):
-        self.llm = llm_provider.get_llm()
+        self.llm: _ConfigurableModel | BaseLLM = llm_provider.get_llm()
 
         # Add nodes
         self.workflow.add_node(
@@ -53,17 +56,27 @@ class WorkflowManager:
         self.workflow.set_entry_point("query_interpretation_and_validation_agent")
 
     def checkpoint(self):
-      self.workflow.compile(
-          checkpointer=MemorySaver()
-      )
+        self.workflow.compile(checkpointer=MemorySaver())
+
     def _query_interpretation_and_validation_agent(
         self, state: AgentState
     ) -> AgentState:
-        return QueryInterpretationAndValidationAgent(self.llm).process(state)
+        _agent: QueryInterpretationAndValidationAgent = (
+            QueryInterpretationAndValidationAgent(self.llm)
+        )
+        _agent_state: AgentState = _agent.process(state)
+        return _agent_state
 
     def _cmr_api_agent(self, state: AgentState) -> AgentState:
-        _response = asyncio.run(CMRApiAgent(self.llm).process(state))
-        return {**state.model_dump(), **_response}  # TODO: Figure out how to cast this to AgentState
+        _agent: CMRApiAgent = CMRApiAgent(self.llm)
+        _agent.get_llm().bind(
+            tools=[fetch_nasa_data]
+        )  # NOTE: Binding the nasa tool... Should also create an output parser here
+        _agent_state: AgentState = asyncio.run(_agent.process(state))
+        return {
+            **state.model_dump(),
+            **_agent_state,
+        }  # TODO: Figure out how to cast this to AgentState
 
     def _data_analysis_and_recommendation_agent(self, state: AgentState) -> AgentState:
         self._log_workflow_state(state)  # TODO: Remove logging statement here

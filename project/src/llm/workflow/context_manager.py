@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langgraph.graph import StateGraph
 from pydantic import BaseModel, Field
 
-from src.ENUMS import CMR_QUERY_INTENTION_ENUM
+from src.ENUMS import CMR_QUERY_INTENTION
 
 
 class ConversationContext(BaseModel):
@@ -17,7 +17,9 @@ class ConversationContext(BaseModel):
 
 
 class ContextManager(BaseModel):
-    checkpoints: list[ConversationContext] = Field(default_factory=list[ConversationContext])
+    checkpoints: list[ConversationContext] = Field(
+        default_factory=list[ConversationContext]
+    )
     context: ConversationContext = Field(default_factory=ConversationContext)
     max_history_length: int = 50
 
@@ -25,7 +27,7 @@ class ContextManager(BaseModel):
         return self.context
 
     def get_relevant_context(
-        self, original_query: str, intent: CMR_QUERY_INTENTION_ENUM
+        self, original_query: str, intent: CMR_QUERY_INTENTION
     ) -> str:
         if original_query is not None and intent is not None:
             enriched_context = {}

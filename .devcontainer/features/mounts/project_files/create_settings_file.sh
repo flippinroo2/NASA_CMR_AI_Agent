@@ -16,6 +16,10 @@ chmod -R g+w /home/vscode/.vscode
 cat << EOF > /home/vscode/.vscode/settings.json
 {
   "explorer.autoReveal": true,
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportShadowImports": "none",
+    "shadowedImport": "none"
+  }
 }
 EOF

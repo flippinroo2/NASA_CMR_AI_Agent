@@ -1,6 +1,7 @@
 from langchain.tools import tool
 import time
 
+
 # This is for failure detection
 class CircuitBreaker:
     def __init__(self, failure_threshold, recovery_timeout):
@@ -29,6 +30,7 @@ class CircuitBreaker:
         self.last_failure = time.time()
         if self.failures >= self.failure_threshold:
             self.state = "open"
+
 
 @tool
 async def fetch_nasa_data(query: str):

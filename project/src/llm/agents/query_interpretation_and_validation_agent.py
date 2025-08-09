@@ -1,12 +1,10 @@
-
-from src.ENUMS import CMR_QUERY_INTENTION_ENUM
+from src.ENUMS import CMR_QUERY_INTENTION
 from src.llm.agents.agent import Agent
 from src.llm.knowledge_graph import KnowledgeGraph
 from src.llm.workflow.agent_state import AgentState
 
 
 class QueryInterpretationAndValidationAgent(Agent):
-
     def _get_query_intent(self, query: str) -> int | None:
         _prompt = f"""Classify the following query into one of these categories:
         1. Exploratory request

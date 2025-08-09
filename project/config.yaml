@@ -1,3 +1,5 @@
+AVAILABLE_LLM_PROVIDERS:
+  - name: Anthropic
 DEBUG: True
 ENABLE_STREAMING: True
 HOST: "0.0.0.0"

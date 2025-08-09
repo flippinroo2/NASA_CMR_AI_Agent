@@ -13,7 +13,8 @@ from lib.file_functions import (
     read_file_as_text_string,
 )
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
-from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from src.ENUMS import LLM_PROVIDER
+from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
 from src.llm.workflow.workflow_manager import WorkflowManager
 from src.user_interface.gui import create_user_interface
@@ -22,7 +23,7 @@ app = FastAPI()  # This is used to enable concurrent handling of requests.
 
 
 async def create_workflow(*args, **kwargs):
-    llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
+    llm_provider = LLMProvider(LLM_PROVIDER.OLLAMA)
     workflow_manager = WorkflowManager(llm_provider)
     compiled_workflow = workflow_manager.workflow.compile()
     return compiled_workflow
