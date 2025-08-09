@@ -34,7 +34,7 @@ def qa_graph():
 
 
 # 4. Unit tests for individual nodes
-def test_retriever_node(qa_graph):
+def test_retriever_node(qa_graph) -> None:
     # Test document retrieval node
     test_query = "What is machine learning?"
     state = {"query": test_query}
@@ -49,7 +49,7 @@ def test_retriever_node(qa_graph):
 
 
 # 5. LLM response validation with Pydantic
-def test_structured_output(qa_graph):
+def test_structured_output(qa_graph) -> None:
     test_query = "Explain quantum computing"
     state = {"query": test_query}
 
@@ -65,7 +65,7 @@ def test_structured_output(qa_graph):
 
 # 6. End-to-end evaluation with Ragas
 @pytest.mark.evaluation
-def test_e2e_ragas(qa_graph):
+def test_e2e_ragas(qa_graph) -> None:
     test_cases = [
         {"query": "What is AI?", "expected_answer": "Artificial Intelligence..."},
         # Add more test cases

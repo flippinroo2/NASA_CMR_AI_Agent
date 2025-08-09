@@ -16,18 +16,20 @@ class TestQueryInterpretationAndValidationAgent(unittest.TestCase):
         self.agent = QueryInterpretationAndValidationAgent(llm)
         self.test_state = AgentState(query=self.test_query)
 
-    def test_query_intent(self):
+    def test_query_intent(self) -> None:
         query_intent: int | None = self.agent._get_query_intent(self.test_query)
-        self.assertIsNotNone(query_intent)
         self.assertIsInstance(query_intent, int)
-        self.assertGreaterEqual(query_intent, 1)
-        self.assertLessEqual(query_intent, 3)
+        if query_intent is not None:
+            self.assertGreaterEqual(query_intent, 1)
+            self.assertLessEqual(query_intent, 3)
+        self.assertIsNotNone(query_intent)
 
-    def test_identifying_sub_queries(self):
-        response: AgentState = self.agent.process(self.test_state)
+    def test_identifying_sub_queries(self) -> None:
+        response: list[str] = self.agent._identify_sub_queries(self.test_query)
+        self.assertIsInstance(response, list)
         print("DEBUG: ", response)
 
-    def test_process_output(self):
+    def test_process_output(self) -> None:
         """
         Ensures that the process method returns an AgentState object.
         """
