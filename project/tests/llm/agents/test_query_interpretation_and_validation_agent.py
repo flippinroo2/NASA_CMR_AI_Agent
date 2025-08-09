@@ -18,8 +18,18 @@ class TestQueryInterpretationAndValidationAgent(unittest.TestCase):
         self.agent = QueryInterpretationAndValidationAgent(llm)
         self.test_state = AgentState(query=self.test_query)
 
+    @pytest.mark.skip
+    def test_01_test_enriching_query_with_context(self) -> None:
+        """
+        Ensures that the enrich_query_with_context() method returns a string.
+        """
+        enriched_query: str = self.agent._enrich_query_with_context(self.test_state)
+        print(
+            "TODO Implement this entire feature"
+        )  # TODO Implement this entire feature
+
     @pytest.mark.mypy_testing
-    def test_01_query_intent(self) -> None:
+    def test_02_query_intent(self) -> None:
         """
         Ensures that the query_intent() method returns a value that is an integer between 1 and 3
         """
@@ -31,7 +41,7 @@ class TestQueryInterpretationAndValidationAgent(unittest.TestCase):
         self.assertIsNotNone(query_intent)
 
     @pytest.mark.mypy_testing
-    def test_02_identifying_sub_queries(self) -> None:
+    def test_03_identifying_sub_queries(self) -> None:
         """
         Ensures that the identify_sub_queries() method returns a list of strings.
         """
@@ -39,7 +49,7 @@ class TestQueryInterpretationAndValidationAgent(unittest.TestCase):
         assert isinstance(sub_queries, list)
         assert all(isinstance(sub_query, str) for sub_query in sub_queries)
 
-    def test_03_process_output(self) -> None:
+    def test_04_process_output(self) -> None:
         """
         Ensures that the process() method returns an AgentState object.
         """
