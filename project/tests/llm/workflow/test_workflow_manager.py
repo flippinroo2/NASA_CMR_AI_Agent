@@ -12,9 +12,12 @@ from src.llm.workflow.workflow_manager import WorkflowManager
 
 
 class TestCMRApiAgent(unittest.TestCase):
+    test_query: str = "Why do you think 2024 had such powerful storms towards the end of the year?"  # TODO: Load the json file with test cases instead of using this hard coded string here.
+    test_state: AgentState
     workflow: WorkflowManager
 
-    def setUp(self):
+    def setUp(self) -> None:
+        test_state = AgentState(query=self.test_query)
         workflow = WorkflowManager(LLMProvider(LLM_PROVIDER.OLLAMA))
 
     def test_01(self) -> None:
