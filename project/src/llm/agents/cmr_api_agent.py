@@ -45,11 +45,12 @@ class CMRApiAgent(Agent):
 
     def _call_tool(self, query):
         template = f"""You are a system that must ONLY respond by calling one of the tools you have been supplied with.
+
         The tool will then provide the answer. Never produce plain natural language answers yourself.
 
         Query: {query}"""
         prompt = ChatPromptTemplate.from_template(template)
-        chain = self.get_llm() | prompt
+        chain = prompt | self.get_llm()
         response = chain.invoke({"query": prompt})
         print(response)
         return response
