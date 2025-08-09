@@ -80,17 +80,27 @@ class TestCMRApiAgent(unittest.TestCase):
         self.agent = CMRApiAgent(llm)
         self.test_state = AgentState(query=self.test_query)
 
-    @pytest.mark.skip
-    def test_01_building_request_parameters(self):
-        response: AgentState = self.agent.process(self.test_state)
-        print("DEBUG")
-
-    def test_02_ensure_the_usage_of_tools(self):
-        response: AgentState = self.agent.process(self.test_state)
+    def test_01_call_tool(self) -> None:
+        response: AgentState = self.agent._call_tool(self.test_query, 1)
         print("DEBUG")
 
     @pytest.mark.skip
-    def test_03_test_api_request(self):
+    def test_02_determine_endpoint_to_search(self):
+        # endpoint = self.agent._determine_endpoint_to_search(self.test_query)
+        print("DEBUG")
+
+    @pytest.mark.skip
+    def test_09_infer_parameters_from_query(self):
+        query_parameters = self.agent._infer_parameters_from_query(self.test_query)
+        print("DEBUG")
+
+    @pytest.mark.skip
+    def test_10_ensure_the_usage_of_tools(self):
+        response: AgentState = self.agent.process(self.test_state)
+        print("DEBUG")
+
+    @pytest.mark.skip
+    def test_11_test_api_request(self):
         response = None
 
         @pytest.mark.mypy_testing
@@ -136,7 +146,7 @@ class TestCMRApiAgent(unittest.TestCase):
 
         self.assertIsNotNone(response)
 
-    def test_05_process_output(self):
+    def test_12_process_output(self):
         """
         Ensures that the process() method returns an AgentState object.
         """

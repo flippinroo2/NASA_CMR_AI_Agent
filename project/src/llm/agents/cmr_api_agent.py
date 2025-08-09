@@ -2,6 +2,7 @@ import asyncio
 import time
 
 import httpx
+from langchain.prompts import ChatPromptTemplate
 
 from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
@@ -41,6 +42,16 @@ class CMRApiAgent(Agent):
         )
         return_value = api_query
         return return_value
+
+    def _call_tool(self, query, query_intent):
+        template = f"""You are a system that must ONLY respond by calling the tool 'my_tool'.
+        The tool will then provide the answer. Never produce plain natural language answers yourself.
+
+        Query: {query}"""
+        prompt = ChatPromptTemplate.from_template(template)
+        chain = self.get_llm() | prompt
+        print(chain)
+        return chain
 
     def _infer_parameters_from_query(self, query):
         prompt = f"""Extract the following parameters from this query:

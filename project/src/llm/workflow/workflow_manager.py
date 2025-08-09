@@ -19,7 +19,7 @@ from src.llm.llm_provider import LLMProvider
 from src.llm.tools.cmr import (
     query_cmr_autocomplete_endpoint,
     query_cmr_collections_endpoint,
-    query_cmr_granule_endpoint,
+    query_cmr_granules_endpoint,
 )
 from src.llm.workflow.agent_state import AgentState
 
@@ -78,7 +78,7 @@ class WorkflowManager:
             tools=[
                 query_cmr_autocomplete_endpoint,
                 query_cmr_collections_endpoint,
-                query_cmr_granule_endpoint,
+                query_cmr_granules_endpoint,
             ]
         )  # NOTE: Binding the nasa tool... Should also create an output parser here
         agent_state: AgentState = asyncio.run(agent.process(state))
