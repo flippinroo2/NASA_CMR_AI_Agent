@@ -7,7 +7,7 @@ from langchain.prompts import ChatPromptTemplate
 from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
 from src.llm.workflow.agent_state import AgentState
-
+from langchain.core.m
 
 class CMRApiAgent(Agent):
     def __init__(self, llm):
@@ -24,7 +24,7 @@ class CMRApiAgent(Agent):
             results = await asyncio.gather(*cmr_queries)
             cleaned_results = [result for result in results if result]
             return {**state.model_dump(), "api_responses": cleaned_results}
-        return {**state.model_dump(), "api_responses": []}
+        return AgentState(**{**state.model_dump(), "api_responses": []})
 
     def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
@@ -43,15 +43,17 @@ class CMRApiAgent(Agent):
         return_value = api_query
         return return_value
 
-    def _call_tool(self, query, query_intent):
-        template = f"""You are a system that must ONLY respond by calling the tool 'my_tool'.
+    def _call_tool(self, query):
+        template = f"""You are a system that must ONLY respond by calling one of the tools you have been supplied with.
         The tool will then provide the answer. Never produce plain natural language answers yourself.
 
         Query: {query}"""
         prompt = ChatPromptTemplate.from_template(template)
         chain = self.get_llm() | prompt
-        print(chain)
-        return chain
+        language_model_input = LanguageModelInput.from_template(prompt, {"query": query})
+        response = chain.invoke(language_model_input)
+        print(response)
+        return response
 
     def _infer_parameters_from_query(self, query):
         prompt = f"""Extract the following parameters from this query:

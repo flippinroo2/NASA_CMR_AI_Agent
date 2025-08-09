@@ -126,7 +126,7 @@ class TestCMRApiAgent(unittest.TestCase):
             )
             assert isinstance(response, list)
             assert all(isinstance(sub_response, dict) for sub_response in response)
-            print("DEBUG")
+            print("TODO: test_query_intent_2")
 
         test_query_intent_2(self)
 
@@ -140,7 +140,7 @@ class TestCMRApiAgent(unittest.TestCase):
             )
             assert isinstance(response, list)
             assert all(isinstance(sub_response, dict) for sub_response in response)
-            print("DEBUG")
+            print("TODO: test_query_intent_3")
 
         test_query_intent_3(self)
 
@@ -150,7 +150,7 @@ class TestCMRApiAgent(unittest.TestCase):
         """
         Ensures that the process() method returns an AgentState object.
         """
-        response: AgentState = self.agent.process(self.test_state)
+        response: AgentState = asyncio.run(self.agent.process(self.test_state))
         self.assertIsInstance(response, AgentState)
 
 
