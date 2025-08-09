@@ -73,8 +73,8 @@ def does_file_exist(file_string: str) -> bool:
 
 
 def get_file_extension_from_filepath(filepath: str) -> str:
-    _file_extension: str = os.path.splitext(filepath)[1]
-    return _file_extension
+    file_extension: str = os.path.splitext(filepath)[1]
+    return file_extension
 
 
 def get_files_by_extension_in_directory(
@@ -110,12 +110,14 @@ def read_file_as_text_string(filename: str) -> str:
         print(f"Error reading file: {filename}")
         raise exception
 
+
 def read_yaml_file_as_dictionary(yaml_filepath: str) -> dict[str, Any] | None:
     try:
         with open(yaml_filepath, "r") as f:
             return yaml.safe_load(f)
     except (FileNotFoundError, yaml.YAMLError) as e:
         print(f"Error reading {yaml_filepath}: {e}")
+
 
 def write_dictionary_to_file(
     filename: str, dictionary_to_write: dict[Any, Any]

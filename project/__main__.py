@@ -39,20 +39,20 @@ async def query_cmr(
     **kwargs,
 ):
     try:
-        _endpoint_mapping: CMR_ENDPOINTS = CMR_ENDPOINTS[endpoint]
+        endpoint_mapping: CMR_ENDPOINTS = CMR_ENDPOINTS[endpoint]
     except KeyError as e:
         print(f"query_cmr() - CMR_ENDPOINTS[endpoint] - KeyError: {e}")
         return  # Returning "None" if invalid endpoint is supplied to prevent program from exiting.
 
-    _params: dict[str, Any] | None = None
-    if _endpoint_mapping == CMR_ENDPOINTS.AUTOCOMPLETE:
-        _params = {"q": search_query}
+    params: dict[str, Any] | None = None
+    if endpoint_mapping == CMR_ENDPOINTS.AUTOCOMPLETE:
+        params = {"q": search_query}
     else:
-        _params = {"keyword": search_query}  # TODO: Extend types of searches allowed
-    if _params:
+        params = {"keyword": search_query}  # TODO: Extend types of searches allowed
+    if params:
         return await APIManager.query_cmr(
-            _endpoint_mapping,
-            params={**_params, "page_size": page_size},
+            endpoint_mapping,
+            params={**params, "page_size": page_size},
         )
 
 

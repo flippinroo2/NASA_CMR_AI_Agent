@@ -73,11 +73,11 @@ class Configuration:
 
     @classmethod
     def _get_configuration_file_content(cls):
-        _configuration_file_content = read_yaml_file_as_dictionary(
+        configuration_file_content = read_yaml_file_as_dictionary(
             cls.configuration_filepath
         )
-        if _configuration_file_content is not None:
-            return _configuration_file_content
+        if configuration_file_content is not None:
+            return configuration_file_content
         if cls.is_debug_mode_activated:
             print(
                 f"Attempting to read configuration file from project/{cls.configuration_filepath}..."
@@ -106,44 +106,44 @@ class Configuration:
         with (
             cls._lock
         ):  # NOTE: This is used to ensure thread safety when changing static values.
-            _configuration_file_values: dict[str, Any] | None = (
+            configuration_file_values: dict[str, Any] | None = (
                 cls._get_configuration_file_content()
             )
-            if _configuration_file_values is not None:
-                for _configuration_item in _configuration_file_values.items():
-                    _configuration_name, _configuration_value = _configuration_item
-                    _configuration_value_to_property_mapping: (
+            if configuration_file_values is not None:
+                for configuration_item in configuration_file_values.items():
+                    configuration_name, configuration_value = configuration_item
+                    configuration_value_to_property_mapping: (
                         CONFIGURATION_VALUE_ENUM | None
                     ) = safe_get_enum_value(
-                        CONFIGURATION_VALUE_ENUM, _configuration_name
+                        CONFIGURATION_VALUE_ENUM, configuration_name
                     )  # NOTE: This is to ensure that values in the configuration file are valid. These values are mapped to properties defined in the Configuration class.
-                    if _configuration_value_to_property_mapping is not None:
+                    if configuration_value_to_property_mapping is not None:
                         cls._safe_set_class_value(
-                            _configuration_value_to_property_mapping.value,
-                            _configuration_value,
+                            configuration_value_to_property_mapping.value,
+                            configuration_value,
                         )  # NOTE: Setting the values in the Configuration class to the mapping values from above.
                     else:
-                        print("Invalid Configuration Value", _configuration_name)
+                        print("Invalid Configuration Value", configuration_name)
             else:
                 print("config.py - Configuration file contained no values.")
 
     @classmethod
     def _set_env_file_values(cls) -> None:
-        _env_file_values: dict[str, str | None] = get_env_file_values()
-        _credentials: str | None = _env_file_values.get("CREDENTIALS", None)
+        env_file_values: dict[str, str | None] = get_env_file_values()
+        credentials: str | None = env_file_values.get("CREDENTIALS", None)
         with cls._lock:
-            if _credentials is not None and _credentials != "":
+            if credentials is not None and credentials != "":
                 print("TODO: Handle credentials here")  # TODO: Handle credentials here
-            for _env_file_key, _env_file_value in _env_file_values.items():
-                _env_value_to_property_mapping: ENVIRONMENT_VARIABLE_ENUM | None = (
-                    safe_get_enum_value(ENVIRONMENT_VARIABLE_ENUM, _env_file_key)
+            for env_file_key, env_file_value in env_file_values.items():
+                env_value_to_property_mapping: ENVIRONMENT_VARIABLE_ENUM | None = (
+                    safe_get_enum_value(ENVIRONMENT_VARIABLE_ENUM, env_file_key)
                 )
-                if _env_value_to_property_mapping is not None:
+                if env_value_to_property_mapping is not None:
                     cls._safe_set_class_value(
-                        _env_value_to_property_mapping.value, _env_file_value
+                        env_value_to_property_mapping.value, env_file_value
                     )
                 else:
-                    cls._safe_set_class_value(_env_file_key, _env_file_value)
+                    cls._safe_set_class_value(env_file_key, env_file_value)
 
 
 Configuration()  # NOTE: This is a singleton since there is protection inside the __init__ method to prevent multiple instances from being created.

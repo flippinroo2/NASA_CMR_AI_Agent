@@ -8,12 +8,12 @@ class DataAnalysisAndRecommendationAgent(Agent):
         return self.llm.invoke(query)
 
     def process(self, state: AgentState) -> AgentState:
-        _query: str | None = state.query
-        if _query is None:
+        query: str | None = state.query
+        if query is None:
             raise ValueError(
                 "WorkflowManager.intent_classifier - There was no query in AgentState"
             )
-        best_datasets = self._determine_best_datasets(_query)
+        best_datasets = self._determine_best_datasets(query)
         return {**state}
 
     def _determine_best_datasets(self, query: str) -> list[str]:

@@ -21,9 +21,9 @@ class Agent(ABC):
         self.knowledge_graph = KnowledgeGraph()
 
     def _invoke(self, query: str) -> str:
-        _llm_response = self._llm.invoke(query)
-        _sanitized_llm_response = self._sanitize_llm_output(_llm_response)
-        return _sanitized_llm_response
+        llm_response = self._llm.invoke(query)
+        sanitized_llm_response = self._sanitize_llm_output(llm_response)
+        return sanitized_llm_response
 
     def _sanitize_llm_output(self, llm_output: str) -> str:
         return replace_double_newline(llm_output)

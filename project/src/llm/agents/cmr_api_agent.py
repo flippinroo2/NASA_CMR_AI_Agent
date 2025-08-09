@@ -14,35 +14,33 @@ class CMRApiAgent(Agent):
         self.session = httpx.AsyncClient()
 
     async def process(self, state: AgentState):
-        _query_intent = state.intent
-        _sub_queries = state.sub_queries
-        if len(_sub_queries):
-            _cmr_queries = self._build_cmr_requests_from_subqueries(
-                _sub_queries, _query_intent
+        query_intent = state.intent
+        sub_queries = state.sub_queries
+        if len(sub_queries):
+            cmr_queries = self._build_cmr_requests_from_subqueries(
+                sub_queries, query_intent
             )
-            _results = await asyncio.gather(*_cmr_queries)
-            _cleaned_results = [_result for _result in _results if _result]
-            return {**state.model_dump(), "api_responses": _cleaned_results}
+            results = await asyncio.gather(*cmr_queries)
+            cleaned_results = [result for result in results if result]
+            return {**state.model_dump(), "api_responses": cleaned_results}
         return {**state.model_dump(), "api_responses": []}
 
     def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
-        _return_value = []
-        for _query in subqueries:
-            _return_value.append(
-                self._build_cmr_request_from_query(_query, query_intent)
-            )
-        return _return_value
+        return_value = []
+        for query in subqueries:
+            return_value.append(self._build_cmr_request_from_query(query, query_intent))
+        return return_value
 
     def _build_cmr_request_from_query(self, query, query_intent):
         # TODO: Expand this function here to actually handle parameters better.
-        _endpoint = CMR_ENDPOINTS.get_item_from_index(query_intent)
-        _query_parameters = self._build_cmr_request_parameters(query, query_intent)
-        _api_query = APIManager.query_cmr(
-            CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": _query_parameters}
+        endpoint = CMR_ENDPOINTS.get_item_from_index(query_intent)
+        query_parameters = self._build_cmr_request_parameters(query, query_intent)
+        api_query = APIManager.query_cmr(
+            CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": query_parameters}
         )
-        _return_value = _api_query
-        return _return_value
+        return_value = api_query
+        return return_value
 
     def _infer_parameters_from_query(self, query):
         prompt = f"""Extract the following parameters from this query:
@@ -54,7 +52,7 @@ class CMRApiAgent(Agent):
         Query: {query}
 
         Return as JSON with null values for any missing parameters."""
-        response = self.llm.invoke(prompt)
+        response = self._invoke(prompt)
         # return json.loads(response) # NOTE: Commenting out because it was causing errors
         return response
 
@@ -62,17 +60,17 @@ class CMRApiAgent(Agent):
         # TODO: Actually make this do something...
         match query_intent:
             case 1:
-                _prompt = f"""Here is a query: {query}
+                prompt = f"""Here is a query: {query}
         Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
         ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
             case 2:
-                _prompt = f"""Here is a query: {query}
+                prompt = f"""Here is a query: {query}
         Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
         ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
             case 3:
-                _prompt = f"""Here is a query: {query}
+                prompt = f"""Here is a query: {query}
           Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
           ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
@@ -80,5 +78,5 @@ class CMRApiAgent(Agent):
                 raise ValueError(
                     f"CMRApiAgent._build_cmr_request_parameters() - Invalid query intent: {query_intent}"
                 )
-        _llm_response = self._invoke(_prompt)
-        return _llm_response
+        llm_response = self._invoke(prompt)
+        return llm_response

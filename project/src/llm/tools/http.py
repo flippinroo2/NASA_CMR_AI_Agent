@@ -1,5 +1,7 @@
-from langchain.tools import tool
 import time
+
+import aiohttp
+from langchain.tools import tool
 
 
 # This is for failure detection
@@ -32,10 +34,16 @@ class CircuitBreaker:
             self.state = "open"
 
 
-@tool
-async def fetch_nasa_data(query: str):
-    """Fetches data from NASA API"""
-    # circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
-    async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://api.nasa.gov/...?q={query}") as resp:
-            return await resp.json()
+# TODO: Create an "args_schema" for the function below
+@tool(
+    name_or_callable="send_http_get_request",
+    description="Sends an HTTP GET request to the provided url and returns an HTTP response.",
+    return_direct=True,
+    infer_schema=False,
+    response_format="content",
+)
+async def send_http_get_request(query: str):
+    """
+    Sends an HTTP GET request to the provided url and returns an HTTP response.
+    """
+    return await aiohttp.ClientSession().get(query)

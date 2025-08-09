@@ -6,7 +6,7 @@ from src.data.api_manager import CMR_ENDPOINTS
 
 
 def create_agent_interface_tab(agent_query_function) -> gradio.Tab:
-    with gradio.Tab("Agent Interface") as _agent_interface_tab:
+    with gradio.Tab("Agent Interface") as agent_interface_tab:
         with gradio.Row():
             agent_output = gradio.Textbox(label="Agent Output")
         with gradio.Row():
@@ -17,7 +17,7 @@ def create_agent_interface_tab(agent_query_function) -> gradio.Tab:
         query_submit_button.click(
             agent_query_function, inputs=user_query_text, outputs=agent_output
         )
-    return _agent_interface_tab
+    return agent_interface_tab
 
 
 def create_api_requester_tab(api_request_function) -> gradio.Tab:
@@ -35,7 +35,7 @@ def create_api_requester_tab(api_request_function) -> gradio.Tab:
                 gradio.update(visible=False),
             )
 
-    with gradio.Tab("API Requester") as _api_requester_tab:
+    with gradio.Tab("API Requester") as api_requester_tab:
         with gradio.Row():
             cmr_endpoint = gradio.Radio(
                 choices=list(
@@ -87,13 +87,13 @@ def create_api_requester_tab(api_request_function) -> gradio.Tab:
             ],
             outputs=api_request_output,
         )
-    return _api_requester_tab
+    return api_requester_tab
 
 
 def create_data_visualization_tab() -> gradio.Tab:
-    with gradio.Tab("Data Visualization") as _data_visualization_tab, gradio.Row():
+    with gradio.Tab("Data Visualization") as data_visualization_tab, gradio.Row():
         data_visualization = gradio.Textbox(label="Data Visualization")
-    return _data_visualization_tab
+    return data_visualization_tab
 
 
 def create_user_interface(agent_query_function, api_request_function) -> gradio.Blocks:

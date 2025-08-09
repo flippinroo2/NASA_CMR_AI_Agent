@@ -40,5 +40,5 @@ class LLMProvider:
             print(f"LLMProvider._get_dynamic_llm() - Exception: {e}")
             raise e
 
-    def set_llm(self, llm) -> None:
+    def set_llm(self, llm: _ConfigurableModel | BaseLLM) -> None:
         self._llm = llm

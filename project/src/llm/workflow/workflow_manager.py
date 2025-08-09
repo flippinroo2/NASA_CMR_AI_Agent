@@ -7,7 +7,7 @@ from langchain_core.language_models import BaseLLM
 from langchain_ollama.llms import OllamaLLM
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph
-from src.llm.tools.http import fetch_nasa_data
+
 from config import Configuration
 from lib.file_functions import write_dictionary_to_file, write_string_to_file
 from lib.time_functions import get_timestamp
@@ -16,6 +16,11 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
     QueryInterpretationAndValidationAgent,
 )
 from src.llm.llm_provider import LLMProvider
+from src.llm.tools.cmr import (
+    query_cmr_autocomplete_endpoint,
+    query_cmr_collections_endpoint,
+    query_cmr_granule_endpoint,
+)
 from src.llm.workflow.agent_state import AgentState
 
 
@@ -61,28 +66,34 @@ class WorkflowManager:
     def _query_interpretation_and_validation_agent(
         self, state: AgentState
     ) -> AgentState:
-        _agent: QueryInterpretationAndValidationAgent = (
+        agent: QueryInterpretationAndValidationAgent = (
             QueryInterpretationAndValidationAgent(self.llm)
         )
-        _agent_state: AgentState = _agent.process(state)
-        return _agent_state
+        agent_state: AgentState = agent.process(state)
+        return agent_state
 
     def _cmr_api_agent(self, state: AgentState) -> AgentState:
-        _agent: CMRApiAgent = CMRApiAgent(self.llm)
-        _agent.get_llm().bind(
-            tools=[fetch_nasa_data]
+        agent: CMRApiAgent = CMRApiAgent(self.llm)
+        agent.get_llm().bind(
+            tools=[
+                query_cmr_autocomplete_endpoint,
+                query_cmr_collections_endpoint,
+                query_cmr_granule_endpoint,
+            ]
         )  # NOTE: Binding the nasa tool... Should also create an output parser here
-        _agent_state: AgentState = asyncio.run(_agent.process(state))
-        return {
-            **state.model_dump(),
-            **_agent_state,
-        }  # TODO: Figure out how to cast this to AgentState
+        agent_state: AgentState = asyncio.run(agent.process(state))
+        return AgentState(
+            **{
+                **state.model_dump(),
+                **agent_state,
+            }
+        )  # TODO: Figure out how to cast this to AgentState
 
     def _data_analysis_and_recommendation_agent(self, state: AgentState) -> AgentState:
         self._log_workflow_state(state)  # TODO: Remove logging statement here
-        _api_responses: list[dict[str, Any]] | None = state.api_responses
-        if _api_responses is not None:
-            for _api_response in _api_responses:
+        api_responses: list[dict[str, Any]] | None = state.api_responses
+        if api_responses is not None:
+            for api_response in api_responses:
                 print("DEBUG")
         return state
 
@@ -90,9 +101,9 @@ class WorkflowManager:
         return state
 
     def _log_workflow_state(self, state: AgentState) -> None:
-        _curent_timestamp: int = get_timestamp()
+        curent_timestamp: int = get_timestamp()
         write_dictionary_to_file(
-            f"{Configuration.log_folder_path}/{_curent_timestamp}/state.json",
+            f"{Configuration.log_folder_path}/{curent_timestamp}/state.json",
             dict(state),
         )
         # _pretty_text: str = pformat(state, indent=2, width=80, sort_dicts=False)
