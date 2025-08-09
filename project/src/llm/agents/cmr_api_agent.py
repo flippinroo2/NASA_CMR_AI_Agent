@@ -44,7 +44,7 @@ class CMRApiAgent(Agent):
         return return_value
 
     def _call_tool(self, query):
-        template = f"""You are a system that must ONLY respond by calling one of the tools you have been supplied with.
+        template = f"""You are a system that must ONLY respond by calling the query_cmr_autocomplete_endpoint tool.
 
         The tool will then provide the answer. Never produce plain natural language answers yourself.
 

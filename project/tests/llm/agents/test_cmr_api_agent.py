@@ -8,6 +8,7 @@ from src.ENUMS import LLM_PROVIDER
 from src.llm.agents.cmr_api_agent import CMRApiAgent
 from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
+from src.llm.workflow.workflow_manager import WorkflowManager
 
 
 class TestCMRApiAgent(unittest.TestCase):
@@ -81,7 +82,7 @@ class TestCMRApiAgent(unittest.TestCase):
         self.test_state = AgentState(query=self.test_query)
 
     def test_01_call_tool(self) -> None:
-        response: AgentState = self.agent._call_tool(self.test_query)
+        test = WorkflowManager._cmr_api_agent({"query", self.test_query})
         print("DEBUG")
 
     @pytest.mark.skip
