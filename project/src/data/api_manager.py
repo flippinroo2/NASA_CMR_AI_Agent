@@ -1,9 +1,9 @@
 import asyncio
 import json
 from dataclasses import asdict, dataclass, field, fields
-from enum import StrEnum
-from typing import Any
 
+from typing import Any
+from src.ENUMS import CMR_ENDPOINTS
 import aiohttp
 import requests
 from aiohttp.client_exceptions import InvalidUrlClientError
@@ -12,24 +12,6 @@ from config import Configuration
 
 # NOTE: I think this was a bit overengineered. In the beginning it was tough to understand the structure of the CMR API.
 
-
-class CMR_ENDPOINTS(StrEnum):
-    AUTOCOMPLETE = "autocomplete"
-    COLLECTIONS = "collections"
-    GRANULES = "granules"
-
-    @staticmethod
-    def get_item_from_index(index) -> str | None:
-        try:
-            return list(CMR_ENDPOINTS)[index - 1]
-        except IndexError as e:
-            print(f"CMR_ENDPOINTS.get_item_from_index() - IndexError: {e}")
-
-    def __str__(self) -> str:
-        return self.value
-
-    def __repr__(self) -> str:
-        return self.value
 
 
 # NOTE: Using "dataclass" instead of Pydantic here to avoid additional overhead.

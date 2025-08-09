@@ -4,12 +4,11 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar
 
-import yaml
 from dotenv import dotenv_values, find_dotenv, load_dotenv
 
-load_dotenv(find_dotenv())
+from lib.file_functions import read_yaml_file_as_dictionary
 
-# NOTE: IF THIS CLASS IS GOING TO BE STATIC WE NEED TO USE LOCKS FOR THREAD SAFETY
+load_dotenv(find_dotenv())
 
 
 class CONFIGURATION_VALUE_ENUM(Enum):
@@ -30,11 +29,8 @@ class CONFIGURATION_VALUE_ENUM(Enum):
 
 @dataclass
 class EnvironmentVariableConfiguration:
-    configuration_filepath: str = field()
+    configuration_filepath: str = field(default="project/config.yaml")
     credentials: str | None = None
-
-
-DEBUG: bool = False
 
 
 class Configuration:
@@ -49,7 +45,7 @@ class Configuration:
     is_debug_mode_activated: ClassVar[bool] = False
     is_production_mode_activated: ClassVar[bool] = False
     is_streaming_enabled: ClassVar[bool] = True
-    log_folder_path: ClassVar[str] = "logs"
+    log_folder_path: ClassVar[str] = "project/logs"
     max_concurrent_requests: ClassVar[int] = 10
     port: ClassVar[int] = 5050
     prompt_folder_path: ClassVar[str] = "project/prompts"
@@ -59,7 +55,7 @@ class Configuration:
     @classmethod
     def __init__(cls) -> None:
         if cls._initialized:
-            return  # This ensures we only set these values one time.
+            return  # NOTE: This ensures we only initialize the class one time. Creating a proper singleton object useable throughout the entire application.
         cls.read_env_file()
         cls._set_configuration_file_values()
         if cls.is_production_mode_activated:
@@ -73,39 +69,26 @@ class Configuration:
     def get_env_file_values():
         return dotenv_values(find_dotenv())
 
-    @staticmethod
-    def get_yaml_file_values(yaml_filepath: str):
-        try:
-            with open(yaml_filepath, "r") as f:
-                return yaml.safe_load(f)
-        except (FileNotFoundError, yaml.YAMLError) as e:
-            print(f"Error reading {yaml_filepath}: {e}")
-
-    @classmethod
-    def get_configuration_file_values(cls) -> dict[str, Any] | None:
-        _configuration_file_values = cls.get_yaml_file_values(
-            cls.configuration_filepath
-        )
-        return _configuration_file_values
-
     @classmethod
     def _set_configuration_file_values(cls):
         with (
             cls._lock
-        ):  # TODO: This is used to ensure thread safety when changing static values.
-            _configuration_file_values = cls.get_configuration_file_values()
+        ):  # NOTE: This is used to ensure thread safety when changing static values.
+            _configuration_file_values = read_yaml_file_as_dictionary(
+                cls.configuration_filepath
+            )
             if _configuration_file_values is not None:
                 for _configuration_item in _configuration_file_values.items():
                     _configuration_name, _configuration_value = _configuration_item
                     try:
                         _configuration_value_to_property_mapping = CONFIGURATION_VALUE_ENUM[
                             _configuration_name
-                        ]  # This is to ensure that values in the configuration file are valid. These values are mapped to properties defined in the Configuration class.
+                        ]  # NOTE: This is to ensure that values in the configuration file are valid. These values are mapped to properties defined in the Configuration class.
                         setattr(
                             cls,
                             _configuration_value_to_property_mapping.value,
                             _configuration_value,
-                        )  # Setting the values in the Configuration class to the mapping values from above.
+                        )  # NOTE: Setting the values in the Configuration class to the mapping values from above.
                     except AttributeError as e:
                         print(f"AttributeError: {e}")
                     except KeyError as e:

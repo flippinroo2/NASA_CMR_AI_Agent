@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from src.llm.workflow.agent_state import AgentState
-from src.llm.agents.knowledge_graph import KnowledgeGraph
+
 from lib.string_functions import replace_double_newline
+from src.llm.knowledge_graph import KnowledgeGraph
+from src.llm.workflow.agent_state import AgentState
 
 # NOTE: Wanted to use an abstract class here even though it isn't very useful at the moment to show my knowledge of how they work.
 

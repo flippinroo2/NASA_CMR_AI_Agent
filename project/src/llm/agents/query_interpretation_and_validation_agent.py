@@ -1,7 +1,7 @@
 
+from src.ENUMS import CMR_QUERY_INTENTION_ENUM
 from src.llm.agents.agent import Agent
-from src.llm.agents.enums import CMR_QUERY_INTENTION_ENUM
-from src.llm.agents.knowledge_graph import KnowledgeGraph
+from src.llm.knowledge_graph import KnowledgeGraph
 from src.llm.workflow.agent_state import AgentState
 
 

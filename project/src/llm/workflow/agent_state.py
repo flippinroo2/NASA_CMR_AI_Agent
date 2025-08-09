@@ -3,7 +3,7 @@ from typing import Any, NotRequired, Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
-from src.llm.agents.enums import CMR_QUERY_INTENTION_ENUM
+from src.ENUMS import CMR_QUERY_INTENTION_ENUM
 from src.llm.workflow.context_manager import ContextManager
 
 
