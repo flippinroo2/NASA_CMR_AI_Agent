@@ -1,9 +1,9 @@
 import asyncio
 import json
 from dataclasses import asdict, dataclass, field, fields
-from enum import Enum
-from typing import Any
 
+from typing import Any
+from src.ENUMS import CMR_ENDPOINTS
 import aiohttp
 import requests
 from aiohttp.client_exceptions import InvalidUrlClientError
@@ -11,12 +11,6 @@ from aiohttp.client_exceptions import InvalidUrlClientError
 from config import Configuration
 
 # NOTE: I think this was a bit overengineered. In the beginning it was tough to understand the structure of the CMR API.
-
-
-class CMR_ENDPOINTS(Enum):
-    AUTOCOMPLETE = "autocomplete"
-    COLLECTIONS = "collections"
-    GRANULES = "granules"
 
 
 # NOTE: Using "dataclass" instead of Pydantic here to avoid additional overhead.
@@ -91,27 +85,6 @@ class CMRSearchParameters:
     standard_product: str | None = field(default=None)
 
 
-# TODO: Consider removing later, but is useful now for helping understand CMR API
-@dataclass
-class CMRQueryParameters:
-    page_size: int = field(default=10)  # Number of results per page
-    page_num: int = field(default=1)  # The page number to return
-    offset: int = field(
-        default=0
-    )  # As an alternative to page_num, a 0-based offset of individual results may be specified.
-    scroll: bool = field(
-        default=False
-    )  # A boolean flag (true/false) that allows all results to be retrieved efficiently. page_size is supported with scroll while page_num and offset are not. If scroll is true then the first call of a scroll session sets the page size; page_size is ignored on subsequent calls
-    sort_key: str | None = field(
-        default=None
-    )  # Indicates one or more fields to sort on
-    pretty: bool = field(default=False)  # Return formatted results if set to true
-    token: str | None = field(
-        default=None
-    )  # Specifies a user token from EDL or Launchpad for use as authentication. Using the standard Authorization header is the prefered way to supply a token. This parameter may be deprecated in the future
-    echo_compatible: bool = field(
-        default=False
-    )  # When set to true results will be returned in an ECHO compatible format. This mostly removes fields and features specific to the CMR such as revision id, granule counts and facets in collection results. Metadata format style results will also use ECHO style names for concept ids such as echo_granule_id and echo_dataset_id.
 
 
 class APIManager:
@@ -130,40 +103,42 @@ class APIManager:
             print(f"APIManager.async_get_request() - Exception: {e}")
 
     @staticmethod
-    async def query_cmr(endpoint: CMR_ENDPOINTS, params: dict[str, Any] = {}, **kwargs):
-        _params: dict[str, Any] = params
-        if _params.get("page_size") is None:
-            _params = {
-                **_params,
+    async def query_cmr(
+        endpoint: CMR_ENDPOINTS | str, params: dict[str, Any] = {}, **kwargs
+    ):
+        params: dict[str, Any] = params
+        if params.get("page_size") is None:
+            params = {
+                **params,
                 "page_size": 10,
             }  # TODO: Fix this. It's really badly written and just done to brute force the LLM to work.
-        _base_url = Configuration.base_endpoint
-        _url = f"{_base_url}{endpoint.value}.json"
-        _response = await APIManager.get_request(_url, params=_params)
-        if _response is not None:
-            _return_value: Any = _response
-            _return_value = APIManager._get_search_entry_list(_response)
-            return _return_value
+        base_url = Configuration.base_endpoint
+        url = f"{base_url}{endpoint.value}.json"  # TODO: Fix error here.
+        response = await APIManager.get_request(url, params=params)
+        if response is not None:
+            return_value: Any = response
+            return_value = APIManager._get_search_entry_list(response)
+            return return_value
 
     @staticmethod
     def _get_search_entry_list(
         search_response: SearchResponse,
     ) -> list[Any]:
-        _search_response: SearchResponse = SearchResponse(**search_response)
-        _search_feed: FeedItem = _search_response.feed
-        return _search_feed.get(
+        search_response: SearchResponse = SearchResponse(**search_response)
+        search_feed: FeedItem = search_response.feed
+        return search_feed.get(
             "entry", []
         )  # TODO: Figure out the type safety stuff here. (Again... consider if this amount of structure is necessary...?)
 
     @staticmethod
     async def query_collections_endpoint(params=None, **kwargs) -> list[dict[str, Any]]:
         # NOTE: This function seems redundant and probably not necessary.
-        _base_url = Configuration.base_endpoint
-        _url: str = f"{_base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
-        _response = await APIManager.get_request(_url, params=params)
-        _feed_entry_list = APIManager._get_search_entry_list(_response)
-        for _feed_entry in _feed_entry_list:
-            _feed_entry_class: CollectionEntry = CollectionEntry(
-                **_feed_entry
+        base_url = Configuration.base_endpoint
+        url: str = f"{base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
+        response = await APIManager.get_request(url, params=params)
+        feed_entry_list = APIManager._get_search_entry_list(response)
+        for feed_entry in feed_entry_list:
+            feed_entry_class: CollectionEntry = CollectionEntry(
+                **feed_entry
             )  # TODO: Do we really need to convert the data into this class? Seems too restrictive.
-        return _feed_entry_list
+        return feed_entry_list
