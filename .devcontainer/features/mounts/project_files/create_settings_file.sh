@@ -15,7 +15,12 @@ chmod -R g+w /home/vscode/.vscode
 # Creating settings.json
 cat << EOF > /home/vscode/.vscode/settings.json
 {
+  "editor.wordWrapColumn": 110,
   "explorer.autoReveal": true,
-  "makefile.configureOnOpen": false
+  "makefile.configureOnOpen": false,
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportShadowImports": "none",
+    "shadowedImport": "none"
+  }
 }
 EOF

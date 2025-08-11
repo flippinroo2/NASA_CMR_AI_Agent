@@ -1,16 +1,12 @@
-from lib.string_functions import sanitize_llm_output
+from src.ENUMS import CMR_QUERY_INTENTION
 from src.llm.agents.agent import Agent
-from src.llm.agents.enums import CMR_QUERY_INTENTION_ENUM
-from src.llm.agents.knowledge_graph import KnowledgeGraph
+from src.llm.knowledge_graph import KnowledgeGraph
 from src.llm.workflow.agent_state import AgentState
 
 
 class QueryInterpretationAndValidationAgent(Agent):
-    def _invoke(self, query: str) -> str:
-        return self.llm.invoke(query)
-
-    def _get_query_intent(self, query: str) -> CMR_QUERY_INTENTION_ENUM | None:
-        _prompt = f"""Classify the following query into one of these categories:
+    def _get_query_intent(self, query: str) -> int | None:
+        prompt = f"""Classify the following query into one of these categories:
         1. Exploratory request
         2. Specific data request
         3. Analytical query
@@ -18,27 +14,27 @@ class QueryInterpretationAndValidationAgent(Agent):
         ONLY RETURN THE NUMBER OF THE CATEGORY, DO NOT PROVIDE ANY OTHER EXPLANATION!
 
         Query: {query}"""
-        _llm_output: str = self._invoke(_prompt)
-        if _llm_output is None:
+        llm_output: str = self._invoke(prompt)
+        if llm_output is None:
             raise ValueError(
                 "QueryInterpretationAndValidationAgent._get_query_intent() - LLM returned None"
             )
-        _sanitized_llm_output = sanitize_llm_output(_llm_output)
         try:
-            _llm_output_as_integer = int(_sanitized_llm_output)
-            _llm_output_as_enum = CMR_QUERY_INTENTION_ENUM(_llm_output_as_integer)
-            return _llm_output_as_enum
+            llm_output_as_integer = int(llm_output)
+            return llm_output_as_integer
         except (ValueError, TypeError) as e:
             print(
                 f"QueryInterpretationAndValidationAgent._get_query_intent() - Error: {e}"
             )
 
     def _enrich_query_with_context(self, state: AgentState) -> str:
-        _context_manager = state.context
-        _relevant_context = _context_manager.get_relevant_context(
-            state.query, state.intent
-        )
-        return f"{state.query}\n\nRelevant context: {_relevant_context}"
+        # TODO: Add context management here
+        # _context_manager = state.context
+        # _relevant_context = _context_manager.get_relevant_context(
+        #     state.query, state.intent
+        # )
+        relevant_context = state.query
+        return f"{state.query}\n\nRelevant context: {relevant_context}"
 
     def _identify_sub_queries(self, query: str) -> list[str]:
         _prompt = f"""Break this complex query into simpler sub-queries:
@@ -48,18 +44,20 @@ class QueryInterpretationAndValidationAgent(Agent):
         
         DO NOT INCLUDE ANY EXPLANATION! ONLY RETURN AN UNORDERED LIST OF QUESTIONS! DO NOT NUMBER THE LIST ITEMS!
         """
-        _llm_output = self._invoke(_prompt)
-        _identified_subqueries = _llm_output.splitlines()
+        llm_output = self._invoke(_prompt)
+        identified_subqueries = llm_output.splitlines()
         # TODO: Do some type of validation here to ensure we get a list of strings back.
-        return _identified_subqueries
+        return identified_subqueries
 
     def process(self, state: AgentState) -> AgentState:
-        _query: str = state.query
-        if _query is None:
+        query: str = state.query
+        if query is None:
             raise ValueError(
                 "WorkflowManager.intent_classifier - There was no query in AgentState"
             )
-        _enriched_query = self._enrich_query_with_context(state)
-        _intent = self._get_query_intent(_enriched_query)
-        sub_queries = self._identify_sub_queries(_enriched_query)
-        return {**state, "intent": _intent, "sub_queries": sub_queries}
+        enriched_query = self._enrich_query_with_context(state)
+        intent = self._get_query_intent(enriched_query)
+        sub_queries = self._identify_sub_queries(enriched_query)
+        return AgentState(
+            **{**state.model_dump(), "intent": intent, "sub_queries": sub_queries}
+        )

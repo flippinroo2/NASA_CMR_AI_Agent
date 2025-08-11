@@ -1,87 +1,84 @@
-import asyncio
-import time
+from asyncio import gather
+from typing import Any
 
-import httpx
+from httpx import AsyncClient
+from langchain.agents import AgentExecutor, ZeroShotAgent
+from langchain.chains.llm import LLMChain
+from langchain.prompts import ChatPromptTemplate, PromptTemplate
+from langchain_core.runnables import RunnableSequence, RunnableSerializable
 
-from lib.string_functions import sanitize_llm_output
 from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
+from src.llm.tools.cmr import query_cmr_autocomplete_endpoint
 from src.llm.workflow.agent_state import AgentState
-
-
-
-
-# This is for failure detection
-class CircuitBreaker:
-    def __init__(self, failure_threshold, recovery_timeout):
-        self.failure_count = 0
-        self.last_failure = None
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.state = "closed"
-
-    def protect(self, func):
-        async def wrapper(*args, **kwargs):
-            if self.state == "open":
-                raise Exception("ServiceUnavailableError")
-            try:
-                result = await func(*args, **kwargs)
-                self.state = "closed"
-                return result
-            except Exception:
-                self._record_failure()
-                raise
-
-        return wrapper
-
-    def _record_failure(self):
-        self.failures += 1
-        self.last_failure = time.time()
-        if self.failures >= self.failure_threshold:
-            self.state = "open"
 
 
 class CMRApiAgent(Agent):
     def __init__(self, llm):
         super().__init__(llm)
-        self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
-        self.session = httpx.AsyncClient()
-
-    def _invoke(self, query: str):
-        return self.llm.invoke(query)
+        self.session = AsyncClient()
 
     async def process(self, state: AgentState):
-        _query_intent = state.get(
-            "intent", 1
-        )  # NOTE: Setting to EXPLORATORY for now because it's the most generic??? (OR do we maybe want intent to be for each sub-query???!!!)
-        _sub_queries = state.get(
-            "sub_queries", []
-        )  # TODO: Check if the list contains entries before moving forward
-
-        _cmr_queries = self._build_cmr_requests_from_subqueries(
-            _sub_queries, _query_intent
-        )
-        _results = await asyncio.gather(*_cmr_queries)
-        _cleaned_results = [_result for _result in _results if _result]
-        return {**state, "api_responses": _cleaned_results}
+        query_intent = state.intent
+        sub_queries = state.sub_queries
+        if len(sub_queries):
+            cmr_queries = self._build_cmr_requests_from_subqueries(
+                sub_queries, query_intent
+            )
+            results = await gather(*cmr_queries)
+            cleaned_results = [result for result in results if result]
+            return {**state.model_dump(), "api_responses": cleaned_results}
+        return AgentState(**{**state.model_dump(), "api_responses": []})
 
     def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
-        _return_value = []
-        for _query in subqueries:
-            _return_value.append(
-                # self.circuit_breaker.protect(self._fetch_data)(_query)
-                self._build_cmr_request_from_query(_query, query_intent)
-            )
-        return _return_value
+        return_value = []
+        for query in subqueries:
+            return_value.append(self._build_cmr_request_from_query(query, query_intent))
+        return return_value
 
     def _build_cmr_request_from_query(self, query, query_intent):
-        _query_parameters = self._build_cmr_request_parameters(query, query_intent)
-        _api_query = APIManager.query_cmr(
-            CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": _query_parameters}
+        # TODO: Expand this function here to actually handle parameters better.
+        endpoint = CMR_ENDPOINTS.get_item_from_index(query_intent)
+        query_parameters = self._build_cmr_request_parameters(query, query_intent)
+        api_query = APIManager.query_cmr(
+            CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": query_parameters}
         )
-        _return_value = _api_query
-        return _return_value
+        return_value = api_query
+        return return_value
+
+    def _call_tool(self, query):
+        agent_scratchpad = ""
+        template = f"""You are a system that must ONLY respond by calling the query_cmr_autocomplete_endpoint tool.
+
+        The tool will then provide the answer. Never produce plain natural language answers yourself.
+
+        Query: {input}
+        {agent_scratchpad}"""
+        chat_prompt_template: ChatPromptTemplate = ChatPromptTemplate.from_template(
+            template
+        )
+        chain: RunnableSerializable[dict[str, Any], str] = (
+            chat_prompt_template | self.get_llm()
+        )
+
+        response: str | Any = chain.invoke({"query": chat_prompt_template})
+        print(response)
+
+        prompt_template: PromptTemplate = PromptTemplate(
+            input_variables=["input", "agent_scratchpad"], template=template
+        )
+        # prompt_template: PromptTemplate = PromptTemplate.from_template(template)
+        llm_chain: LLMChain = LLMChain(llm=self.get_llm(), prompt=prompt_template)
+        agent = ZeroShotAgent(
+            llm_chain=llm_chain, allowed_tools=["query_cmr_autocomplete_endpoint"]
+        )
+        # executor = AgentExecutor.from_agent_and_tools()
+        executor = AgentExecutor(
+            agent=agent, tools=[query_cmr_autocomplete_endpoint], verbose=True
+        )
+        test = executor.invoke({"input": query})
+        return response
 
     def _infer_parameters_from_query(self, query):
         prompt = f"""Extract the following parameters from this query:
@@ -93,23 +90,31 @@ class CMRApiAgent(Agent):
         Query: {query}
 
         Return as JSON with null values for any missing parameters."""
-        response = self.llm.invoke(prompt)
+        response = self._invoke(prompt)
         # return json.loads(response) # NOTE: Commenting out because it was causing errors
         return response
 
     def _build_cmr_request_parameters(self, query, query_intent):
-        _prompt = f"""Here is a query: {query}
+        # TODO: Actually make this do something...
+        match query_intent:
+            case 1:
+                prompt = f"""Here is a query: {query}
         Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
         ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
-        _llm_response = self._invoke(_prompt)
-        _return_value = sanitize_llm_output(_llm_response)
-        return _return_value
+            case 2:
+                prompt = f"""Here is a query: {query}
+        Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
 
-    # @circuit_breaker.protect # TODO: Make this decorator work by using the circuit breaker attached to this object
-    async def _fetch_data(self, query):
-        params = self._build_cmr_request_parameters(query)
-        response = await self.session.get(
-            "https://cmr.earthdata.nasa.gov/search", params=params, timeout=30
-        )
-        return response.json()
+        ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
+            case 3:
+                prompt = f"""Here is a query: {query}
+          Break this query down into a search term to use for a single NASA Common Metadata Repository API request.
+
+          ONLY RETURN THE SEARCH TERM! DO NOT PROVIDE ANY OTHER EXPLANATION! DO NOT USE ANY VERBS!"""
+            case _:
+                raise ValueError(
+                    f"CMRApiAgent._build_cmr_request_parameters() - Invalid query intent: {query_intent}"
+                )
+        llm_response = self._invoke(prompt)
+        return llm_response

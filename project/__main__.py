@@ -13,7 +13,8 @@ from lib.file_functions import (
     read_file_as_text_string,
 )
 from src.data.api_manager import CMR_ENDPOINTS, APIManager, CMRQueryParameters
-from src.llm.llm_provider import LLM_PROVIDER_ENUM, LLMProvider
+from src.ENUMS import LLM_PROVIDER
+from src.llm.llm_provider import LLMProvider
 from src.llm.workflow.agent_state import AgentState
 from src.llm.workflow.workflow_manager import WorkflowManager
 from src.user_interface.gui import create_user_interface
@@ -22,7 +23,7 @@ app = FastAPI()  # This is used to enable concurrent handling of requests.
 
 
 async def create_workflow(*args, **kwargs):
-    llm_provider = LLMProvider(LLM_PROVIDER_ENUM.OLLAMA)
+    llm_provider = LLMProvider(LLM_PROVIDER.OLLAMA)
     workflow_manager = WorkflowManager(llm_provider)
     compiled_workflow = workflow_manager.workflow.compile()
     return compiled_workflow
@@ -38,20 +39,20 @@ async def query_cmr(
     **kwargs,
 ):
     try:
-        _endpoint_mapping: CMR_ENDPOINTS = CMR_ENDPOINTS[endpoint]
+        endpoint_mapping: CMR_ENDPOINTS = CMR_ENDPOINTS[endpoint]
     except KeyError as e:
         print(f"query_cmr() - CMR_ENDPOINTS[endpoint] - KeyError: {e}")
         return  # Returning "None" if invalid endpoint is supplied to prevent program from exiting.
 
-    _params: dict[str, Any] | None = None
-    if _endpoint_mapping == CMR_ENDPOINTS.AUTOCOMPLETE:
-        _params = {"q": search_query}
+    params: dict[str, Any] | None = None
+    if endpoint_mapping == CMR_ENDPOINTS.AUTOCOMPLETE:
+        params = {"q": search_query}
     else:
-        _params = {"keyword": search_query}  # TODO: Extend types of searches allowed
-    if _params:
+        params = {"keyword": search_query}  # TODO: Extend types of searches allowed
+    if params:
         return await APIManager.query_cmr(
-            _endpoint_mapping,
-            params={**_params, "page_size": page_size},
+            endpoint_mapping,
+            params={**params, "page_size": page_size},
         )
 
 

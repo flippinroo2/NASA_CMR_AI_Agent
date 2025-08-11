@@ -7,7 +7,6 @@
 **/.updateContentCommandMarker
 
 # FOLDERS
+logs
 project/.venv
 project/logs
-
-# llm_examples
