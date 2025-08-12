@@ -169,7 +169,7 @@ async def query_cmr_autocomplete_endpoint(query: str) -> list[AutocompleteEntry]
     cleaned_query: str = replace_double_newline(query)
     response = await get_request(
         f"{Configuration.base_endpoint}{CMR_ENDPOINTS.AUTOCOMPLETE.value}.json",
-        params={"q": cleaned_query},
+        parameters={"q": cleaned_query},
     )
     if response is not None:
         search_response: SearchResponse = SearchResponse(**response)
@@ -209,7 +209,7 @@ async def query_cmr_collections_endpoint(keyword: str):
     cleaned_keyword: str = replace_double_newline(keyword)
     response = await get_request(
         url=f"{Configuration.base_endpoint}{CMR_ENDPOINTS.COLLECTIONS.value}.json",
-        params={"keyword": cleaned_keyword},
+        parameters={"keyword": cleaned_keyword},
     )
     if response is not None:
         search_response: SearchResponse = SearchResponse(**response)
@@ -245,7 +245,7 @@ async def query_cmr_granules_endpoint(keyword: str):
     cleaned_keyword: str = replace_double_newline(keyword)
     response = await get_request(
         url=f"{Configuration.base_endpoint}{CMR_ENDPOINTS.GRANULES.value}.json",
-        params={"keyword": cleaned_keyword},
+        parameters={"keyword": cleaned_keyword},
     )
     if response is not None:
         search_response: SearchResponse = SearchResponse(**response)

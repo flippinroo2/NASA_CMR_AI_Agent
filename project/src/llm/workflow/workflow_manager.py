@@ -161,7 +161,7 @@ class WorkflowManager:
         api_responses: list[dict[str, Any]] | None = state.api_responses
         if api_responses is not None:
             for api_response in api_responses:
-                print("DEBUG")
+                print("TODO: Process API responses here")
         return state
 
     async def _response_synthesis_and_formatting_agent(

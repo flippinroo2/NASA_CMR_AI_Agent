@@ -1,9 +1,10 @@
+from contextlib import contextmanager
 from enum import StrEnum
 from io import TextIOWrapper
 from json import dumps
 from os import getcwd, listdir, makedirs
 from os.path import abspath, dirname, exists, isdir, isfile, join, splitext
-from typing import IO, Any, Literal
+from typing import IO, Any, Generator, Literal
 
 from yaml import YAMLError, safe_load
 
@@ -22,21 +23,21 @@ class FILE_EXTENSIONS(StrEnum):
     YAML = ".yaml"
 
 
-def check_if_string_is_a_file(file_string: str) -> bool:
+def check_if_string_is_a_file(uri: str) -> bool:
     """
     Helper function for checking if a string is a file.
 
     Args:
-        file_string (str): A string that should represent the path to a file.
+        uri (str): A string that should represent the path to a file.
 
     Returns:
         bool: Does the string represent a file? True if so, False if not.
     """
-    if isfile(file_string):
+    if isfile(uri):
         return True
-    if isfile(join(getcwd(), file_string)):
+    if isfile(join(getcwd(), uri)):
         print(
-            f"The provided file string: {file_string} was not a file, however, appending the string to the current working directory did return a valid file string... Returning True."
+            f"The provided file string: {uri} was not a file, however, appending the string to the current working directory did return a valid file string... Returning True."
         )
         return True
     return False
@@ -189,6 +190,7 @@ def get_parent_directory_name(directory_string: str, depth_upwards: int = 1) -> 
     return return_directory_name
 
 
+@contextmanager
 def open_file(
     uri: str,
     mode: Literal[
@@ -210,7 +212,7 @@ def open_file(
         "a+b",
     ],  # NOTE: Adding both "rb+" and "r+b" syntax because they are 100% equal in Python, but up to user preference.
     encoding: str = "utf-8",
-) -> IO[Any] | None:
+) -> Generator[IO[Any], Any, None]:
     """
     Helper function to safely open a file.
 
@@ -220,7 +222,7 @@ def open_file(
         encoding (str): The encoding to use when opening the file. Setting default to utf-8, because that is the most standard.
 
     Returns:
-        IO[Any] | None: The file object, or None if the file could not be opened.
+        Generator[IO[Any], Any, None]: The file object, or None if the file could not be opened.
 
     Raises:
         FileNotFoundError: The file does not exist.
@@ -233,9 +235,10 @@ def open_file(
         YAMLError: An error occurred while parsing a YAML file.
         Exception: An unexpected error occurred. (This type of exception is actually raised)
     """
+    file: IO[Any] | None = None
     try:
-        with open(file=uri, mode=mode, encoding=encoding) as file:
-            return file
+        file = open(file=uri, mode=mode, encoding=encoding)  # noqa: SIM115
+        yield file
     except FileNotFoundError as exception:
         print("File not found.", exception)
     except PermissionError as exception:
@@ -257,6 +260,9 @@ def open_file(
     except Exception as exception:
         print(f"Error opening file: {uri} | mode: {mode}")
         raise exception
+    finally:
+        if file is not None:
+            file.close()
 
 
 def read_file_as_text_string(uri: str) -> str | None:
@@ -269,9 +275,9 @@ def read_file_as_text_string(uri: str) -> str | None:
     Returns:
         str | None: The contents of the file as a string, or None if any errors occurred when opening the file.
     """
-    file_content: IO[Any] | None = open_file(uri, "r")
-    if file_content is not None:
-        return file_content.read()
+    with open_file(uri, "r") as file_content:
+        if file_content is not None:
+            return file_content.read()
 
 
 def read_yaml_file_as_dictionary(yaml_filepath: str) -> dict[str, Any] | None:
@@ -283,10 +289,19 @@ def read_yaml_file_as_dictionary(yaml_filepath: str) -> dict[str, Any] | None:
 
     Returns:
         dict[str, Any] | None: The contents of the YAML file as a dictionary, or None if any errors occurred when opening the file.
+
+    Raises:
+        ValueError:
     """
-    file: IO[Any] | None = open_file(yaml_filepath, "r")
-    if file is not None:
-        return safe_load(file)
+    with open_file(yaml_filepath, "r") as file_content:
+        if file_content is not None:
+            try:
+                yaml_file = safe_load(
+                    file_content.read()
+                )  # NOTE: It's important to call ".read()" here, or it could cause an error with the file closing too early.
+                return yaml_file
+            except ValueError as exception:
+                print(f"ValueError: {exception}")
 
 
 def write_dictionary_to_file(
@@ -312,7 +327,7 @@ def write_dictionary_to_file(
     return write_string_to_file(uri=uri, text_to_write=formatted_string)
 
 
-def write_string_to_file(uri: str, text_to_write: str) -> IO[Any] | None:
+def write_string_to_file(uri: str, text_to_write: str | None) -> IO[Any] | None:
     """
     Helper function to write a string to a file.
 
@@ -323,14 +338,15 @@ def write_string_to_file(uri: str, text_to_write: str) -> IO[Any] | None:
     Returns:
         IO[Any] | None: The file object, or None if the file could not be opened.
     """
-    parent_directory: str = get_parent_directory_name(uri)
-    directory_check: bool = check_if_string_is_a_directory(parent_directory)
-    if not directory_check:
-        create_directory(parent_directory)
-    _file_extension: str = get_file_extension_from_filepath(uri)
-    if _file_extension == FILE_EXTENSIONS.JSON.value:
-        text_to_write = format_json_string(text_to_write)
-    file: IO[Any] | None = open_file(uri, "w")
-    if file is not None:
-        file.write(text_to_write)
-    return file
+    if text_to_write is not None:
+        parent_directory: str = get_parent_directory_name(uri)
+        directory_check: bool = check_if_string_is_a_directory(parent_directory)
+        if not directory_check:
+            create_directory(parent_directory)
+        _file_extension: str = get_file_extension_from_filepath(uri)
+        if _file_extension == FILE_EXTENSIONS.JSON.value:
+            text_to_write = format_json_string(text_to_write)
+        with open_file(uri, "w") as file_content:
+            if file_content is not None:
+                file_content.write(text_to_write)
+            return file_content

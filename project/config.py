@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 
 from lib.enum_functions import safe_get_enum_value
 from lib.environment_functions import get_env_file_values
-from lib.file_functions import does_file_exist, read_yaml_file_as_dictionary
+from lib.file_functions import check_if_string_is_a_file, read_yaml_file_as_dictionary
 
 
 class CONFIGURATION_VALUE_ENUM(Enum):
@@ -65,20 +65,23 @@ class Configuration:
         else:
             cls.base_endpoint = cls._test_endpoint
 
-        if not does_file_exist(cls.prompt_folder_path):
+        if not check_if_string_is_a_file(cls.prompt_folder_path):
             cls.prompt_folder_path = f"project/{cls.prompt_folder_path}"  # TODO: Make this more dynamic instead of hard coding.
 
+        # TODO: Maybe work on a more dynamic way to enable / disable langsmith.
         if cls.should_langsmith_be_used:
             os.environ["LANGCHAIN_API_KEY"] = os.environ["_LANGCHAIN_API_KEY"]
+            os.environ["LANGCHAIN_PROJECT"] = os.environ["_LANGCHAIN_PROJECT"]
+            os.environ["LANGCHAIN_TRACING_V2"] = os.environ["_LANGCHAIN_TRACING_V2"]
 
     @classmethod
     def _get_filepaths(cls):
         pass
 
     @classmethod
-    def _get_configuration_file_content(cls):
-        configuration_file_content = read_yaml_file_as_dictionary(
-            cls.configuration_filepath
+    def _get_configuration_file_content(cls) -> dict[str, Any] | None:
+        configuration_file_content: dict[str, Any] | None = (
+            read_yaml_file_as_dictionary(cls.configuration_filepath)
         )
         if configuration_file_content is not None:
             return configuration_file_content
@@ -86,9 +89,13 @@ class Configuration:
             print(
                 f"Attempting to read configuration file from project/{cls.configuration_filepath}..."
             )
-            return read_yaml_file_as_dictionary(
-                f"project/{cls.configuration_filepath}"
-            )  # TODO: Make this a bit more dynamic instead of hard coding.
+        configuration_file_content = read_yaml_file_as_dictionary(
+            f"project/{cls.configuration_filepath}"
+        )  # TODO: Make this a bit more dynamic instead of hard coding.
+        if configuration_file_content is not None:
+            return configuration_file_content
+        if cls.is_debug_mode_activated:
+            print("Attempting to read configuration file from config.yaml...")
         return read_yaml_file_as_dictionary(
             "config.yaml"
         )  # TODO: Make this a bit more dynamic instead of hard coding.

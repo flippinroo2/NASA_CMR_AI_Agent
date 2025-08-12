@@ -11,6 +11,10 @@ clean:
 	@echo "Cleaning..."
 	@rm -rf "__pycache__"
 
+generate_requirements:
+	@echo "Generating requirements.txt file..."
+	poetry export -f requirements.txt --output requirements.txt
+
 install:
 	@echo "Installing..."
 	poetry install --no-root

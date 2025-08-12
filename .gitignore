@@ -1,4 +1,5 @@
 # FILES
+**/.DS_Store
 **/*.env
 **/*.pyc
 **/HIDDEN_NOTES.md

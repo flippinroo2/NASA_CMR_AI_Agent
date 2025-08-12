@@ -1,6 +1,5 @@
-AVAILABLE_LLM_PROVIDERS:
-  - name: Anthropic
-DEBUG: False
+AVAILABLE_LLM_PROVIDERS: ["anthropic", "bedrock", "google", "groq", "huggingface", "lmstudio", "mistral", "nvidia", "ollama", "openai", "perplexity", "xai"]
+DEBUG: True
 ENABLE_STREAMING: True
 HOST: "0.0.0.0"
 LOG_FOLDER_PATH: "logs"

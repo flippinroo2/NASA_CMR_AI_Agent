@@ -76,8 +76,6 @@ class CMRSearchParameters:
     standard_product: str | None = field(default=None)
 
 
-
-
 class APIManager:
     @staticmethod
     async def query_cmr(
@@ -91,7 +89,7 @@ class APIManager:
             }  # TODO: Fix this. It's really badly written and just done to brute force the LLM to work.
         base_url = Configuration.base_endpoint
         url = f"{base_url}{endpoint.value}.json"  # TODO: Fix error here.
-        response = await get_request(url, params=params)
+        response = await get_request(url, parameters=params)
         if response is not None:
             return_value: Any = response
             return_value = APIManager._get_search_entry_list(response)
@@ -108,11 +106,13 @@ class APIManager:
         )  # TODO: Figure out the type safety stuff here. (Again... consider if this amount of structure is necessary...?)
 
     @staticmethod
-    async def query_collections_endpoint(params=None, **kwargs) -> list[dict[str, Any]]:
+    async def query_collections_endpoint(
+        parameters=None, **kwargs
+    ) -> list[dict[str, Any]]:
         # NOTE: This function seems redundant and probably not necessary.
         base_url = Configuration.base_endpoint
         url: str = f"{base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
-        response = await get_request(url, params=params)
+        response = await get_request(url, parameters=params)
         feed_entry_list = APIManager._get_search_entry_list(response)
         for feed_entry in feed_entry_list:
             feed_entry_class: CollectionEntry = CollectionEntry(
