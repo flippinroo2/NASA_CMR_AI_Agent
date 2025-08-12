@@ -1,4 +1,4 @@
-from dotenv import dotenv_values, find_dotenv, load_dotenv
+import dotenv
 
 
 def get_env_file_path() -> str:
@@ -11,7 +11,7 @@ def get_env_file_path() -> str:
     Raises:
         ValueError: If no .env file is found. (This type of exception is actually raised)
     """
-    env_file: str = find_dotenv()
+    env_file: str = dotenv.find_dotenv()
     if env_file is None:
         raise ValueError(
             "No .env file found"
@@ -19,7 +19,7 @@ def get_env_file_path() -> str:
     return env_file
 
 
-load_dotenv(
+dotenv.load_dotenv(
     get_env_file_path()
 )  # NOTE: This will be called when importing this module.
 
@@ -31,4 +31,4 @@ def get_env_file_values() -> dict[str, str | None]:
     Returns:
         dict[str, str | None]: The values from the .env file.
     """
-    return dotenv_values(get_env_file_path())
+    return dotenv.dotenv_values(get_env_file_path())

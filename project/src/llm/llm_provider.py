@@ -1,14 +1,14 @@
 from typing import Type, TypeVar
 
-from langchain.chat_models import init_chat_model
-from langchain.chat_models.base import _ConfigurableModel
-from langchain_core.language_models import BaseLLM
-from langchain_ollama.llms import OllamaLLM
-from langchain_openai.llms import OpenAI
+import langchain.chat_models
+import langchain.chat_models.base
+import langchain_core.language_models
+import langchain_ollama.llms
+import langchain_openai.llms
 
-from src.ENUMS import LLM_PROVIDER
+import src.ENUMS
 
-T_BaseLLM = TypeVar("T_BaseLLM", bound=Type[BaseLLM])
+T_BaseLLM = TypeVar("T_BaseLLM", bound=Type[langchain_core.language_models.BaseLLM])
 
 
 class LLMProvider:
@@ -16,18 +16,18 @@ class LLMProvider:
     Class used for handling connections to different LLMs
     """
 
-    _llm: _ConfigurableModel | BaseLLM | None = None
-    _llm_class: Type[BaseLLM] = BaseLLM
+    _llm: langchain.chat_models.base._ConfigurableModel | langchain_core.language_models.BaseLLM | None = None
+    _llm_class: Type[langchain_core.language_models.BaseLLM] = langchain_core.language_models.BaseLLM
 
-    def __init__(self, llm_provider: LLM_PROVIDER) -> None:
-        if llm_provider == LLM_PROVIDER.OLLAMA:
-            self._llm_class = OllamaLLM
-        if llm_provider == LLM_PROVIDER.LM_STUDIO:
-            self._llm_class = OpenAI  # TODO: This needs to work similar to an OpenAI model, however, the parameters will point it to a localhost URL instead.
+    def __init__(self, llm_provider: src.ENUMS.LLM_PROVIDER) -> None:
+        if llm_provider == src.ENUMS.LLM_PROVIDER.OLLAMA:
+            self._llm_class = langchain_ollama.llms.OllamaLLM
+        if llm_provider == src.ENUMS.LLM_PROVIDER.LM_STUDIO:
+            self._llm_class = langchain_openai.llms.OpenAI  # TODO: This needs to work similar to an OpenAI model, however, the parameters will point it to a localhost URL instead.
 
     def get_llm(
         self, model_name: str = "gemma3:latest"
-    ) -> _ConfigurableModel | BaseLLM:
+    ) -> langchain.chat_models.base._ConfigurableModel | langchain_core.language_models.BaseLLM:
         """
         Returns the value of the _llm variable.
 
@@ -52,7 +52,7 @@ class LLMProvider:
                 raise exception
         return self._llm
 
-    def _get_dynamic_llm(self, model_name) -> _ConfigurableModel:
+    def _get_dynamic_llm(self, model_name) -> langchain.chat_models.base._ConfigurableModel:
         """
         Dynamically initialize a chat model based on model name.
 
@@ -63,12 +63,12 @@ class LLMProvider:
             The initialized chat model.
         """
         try:
-            return init_chat_model(model_name=model_name)
+            return langchain.chat_models.init_chat_model(model_name=model_name)
         except Exception as exception:
             print(f"LLMProvider._get_dynamic_llm() - Exception: {exception}")
             raise exception
 
-    def set_llm(self, llm: _ConfigurableModel | BaseLLM) -> None:
+    def set_llm(self, llm: langchain.chat_models.base._ConfigurableModel | langchain_core.language_models.BaseLLM) -> None:
         """
         Sets the value of the _llm variable.
 

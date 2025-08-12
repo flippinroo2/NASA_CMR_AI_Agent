@@ -1,24 +1,18 @@
-from asyncio import gather, run
+
+import asyncio
 from types import CoroutineType
 from typing import Any
 
-from httpx import AsyncClient
-from langchain.agents import AgentExecutor, ZeroShotAgent
-from langchain.chains.llm import LLMChain
-from langchain.output_parsers import PydanticOutputParser
-from langchain.prompts import PromptTemplate
-from langchain_core.prompts import BasePromptTemplate
-from langchain_core.tools import BaseTool
+import httpx
+import langchain.agents
+import langchain.chains.llm
+import langchain.output_parsers
+import langchain.prompts
+import langchain_core.prompts
+import langchain_core.tools
 
-from src.llm.agents.agent import Agent
-from src.llm.tools.cmr import (
-    AutocompleteEntry,
-    CMRQueryParameters,
-    CollectionEntry,
-    query_cmr_autocomplete_endpoint,
-    query_cmr_collections_endpoint,
-    query_cmr_granules_endpoint,
-)
+import src.llm.agents.agent
+import src.llm.tools.cmr
 from src.llm.workflow.agent_state import AgentState
 
 """
@@ -26,10 +20,10 @@ from src.llm.workflow.agent_state import AgentState
 2nd - Use those values to determine arguments for the granules request
 """
 
-class CMRApiAgent(Agent):
+class CMRApiAgent(src.llm.agents.agent.Agent):
     def __init__(self, llm):
         super().__init__(llm)
-        self.session = AsyncClient()
+        self.session = httpx.AsyncClient()
 
     async def process(self, state: AgentState) -> AgentState:
         query_intent: int | None = state.intent
@@ -38,7 +32,7 @@ class CMRApiAgent(Agent):
             cmr_queries = await self._build_cmr_requests_from_subqueries(
                 sub_queries, query_intent
             )
-            results = await gather(*cmr_queries)
+            results = await asyncio.gather(*cmr_queries)
             cleaned_results = [result for result in results if result]
             return state.model_copy(update={"api_responses": cleaned_results})
         return state.model_copy(update={"api_responses": []})
@@ -47,22 +41,22 @@ class CMRApiAgent(Agent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
         return_value = []
         for subquery in subqueries:
-            query_parameters: CMRQueryParameters = (
+            query_parameters: src.llm.tools.cmr.CMRQueryParameters = (
                 await self._extract_cmr_request_parameters_from_query(subquery)
             )
             cmr_request: CoroutineType[
-                Any, Any, list[AutocompleteEntry | CollectionEntry]
+                Any, Any, list[src.llm.tools.cmr.AutocompleteEntry | src.llm.tools.cmr.CollectionEntry]
             ] = self._send_cmr_api_request(subquery, query_parameters)
             return_value.append(cmr_request)
         return return_value
 
     async def _send_cmr_api_request(
         self, query, query_parameters
-    ) -> list[AutocompleteEntry | CollectionEntry]:
-        tools_list: list[BaseTool] = [
-            query_cmr_autocomplete_endpoint,
-            query_cmr_collections_endpoint,
-            query_cmr_granules_endpoint,
+    ) -> list[src.llm.tools.cmr.AutocompleteEntry | src.llm.tools.cmr.CollectionEntry]:
+        tools_list: list[langchain_core.tools.BaseTool] = [
+            src.llm.tools.cmr.query_cmr_autocomplete_endpoint,
+            src.llm.tools.cmr.query_cmr_collections_endpoint,
+            src.llm.tools.cmr.query_cmr_granules_endpoint,
         ]
         tool_string: str = "\n".join(
             f"{tool.name}: {tool.description}" for tool in tools_list
@@ -87,15 +81,15 @@ class CMRApiAgent(Agent):
         Question: {input}
         {agent_scratchpad}
         """
-        prompt_template: BasePromptTemplate[Any] = PromptTemplate(
+        prompt_template: langchain_core.prompts.BasePromptTemplate[Any] = langchain.prompts.PromptTemplate(
             input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
             template=template,
         ).partial(tools=tool_string, tool_names=tool_names)
-        llm_chain: LLMChain = LLMChain(llm=self.get_llm(), prompt=prompt_template)
-        agent: ZeroShotAgent = ZeroShotAgent(
+        llm_chain: langchain.chains.llm.LLMChain = langchain.chains.llm.LLMChain(llm=self.get_llm(), prompt=prompt_template)
+        agent: langchain.agents.ZeroShotAgent = langchain.agents.ZeroShotAgent(
             llm_chain=llm_chain, allowed_tools=[tool.name for tool in tools_list]
         )
-        executor: AgentExecutor = AgentExecutor(
+        executor: langchain.agents.AgentExecutor = langchain.agents.AgentExecutor(
             verbose=True,
             agent=agent,
             tools=tools_list,
@@ -111,12 +105,12 @@ class CMRApiAgent(Agent):
 
     async def _extract_cmr_request_parameters_from_query(
         self, query
-    ) -> CMRQueryParameters:
+    ) -> src.llm.tools.cmr.CMRQueryParameters:
         """
         NOTE: This function doesn't really seem necessary. It would probably be more valuable to use the "CMRSearchParameters" object to dynamically choose what to search on?
         """
-        parser: PydanticOutputParser[CMRQueryParameters] = PydanticOutputParser(
-            pydantic_object=CMRQueryParameters
+        parser: langchain.output_parsers.PydanticOutputParser[src.llm.tools.cmr.CMRQueryParameters] = langchain.output_parsers.PydanticOutputParser(
+            pydantic_object=src.llm.tools.cmr.CMRQueryParameters
         )
         template = """Extract the following parameters from this query:
 
@@ -141,7 +135,7 @@ class CMRApiAgent(Agent):
         Query: {query}
         """
         format_instructions: str = parser.get_format_instructions()
-        prompt_template = PromptTemplate(
+        prompt_template = langchain.prompts.PromptTemplate(
             input_variables=["query"],
             template=template,
             partial_variables={"format_instructions": format_instructions},

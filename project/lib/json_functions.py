@@ -1,4 +1,4 @@
-from json import JSONDecodeError, dumps, loads
+import json
 
 
 def format_json_string(json_string: str, indent_size: int = 2) -> str | None:
@@ -19,8 +19,8 @@ def format_json_string(json_string: str, indent_size: int = 2) -> str | None:
     formatted_json_string: str | None = None
     try:
         try:
-            json_loaded_string = loads(json_string)
-        except JSONDecodeError as exception:
+            json_loaded_string = json.loads(json_string)
+        except json.JSONDecodeError as exception:
             print(f"format_json_string() - JSONDecodeError: {exception}")
         except TypeError as exception:
             print(f"format_json_string() - TypeError: {exception}")
@@ -29,7 +29,7 @@ def format_json_string(json_string: str, indent_size: int = 2) -> str | None:
 
         if json_loaded_string is not None:
             try:
-                formatted_json_string = dumps(json_loaded_string, indent=indent_size)
+                formatted_json_string = json.dumps(json_loaded_string, indent=indent_size)
             except TypeError as exception:
                 print(f"format_json_string() - TypeError: {exception}")
             except OverflowError as exception:

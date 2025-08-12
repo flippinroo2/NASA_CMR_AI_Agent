@@ -1,7 +1,7 @@
-from enum import Enum, StrEnum
+import enum
 
 
-class CMR_ENDPOINTS(StrEnum):
+class CMR_ENDPOINTS(enum.StrEnum):
     """
     Enum class for CMR endpoints.
     """
@@ -24,7 +24,7 @@ class CMR_ENDPOINTS(StrEnum):
         return self.value
 
 
-class CMR_QUERY_INTENTION(Enum):
+class CMR_QUERY_INTENTION(enum.Enum):
     """
     Enum class for determining the intent of a question for the CMR.
     """
@@ -40,7 +40,7 @@ class CMR_QUERY_INTENTION(Enum):
         return f"CMR_QUERY_INTENTION_ENUM.{self.name}"
 
 
-class LLM_PROVIDER(Enum):
+class LLM_PROVIDER(enum.Enum):
     """
     Enum class for LLM providers.
     """

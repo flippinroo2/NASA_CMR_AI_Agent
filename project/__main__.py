@@ -4,16 +4,13 @@ import gradio
 import uvicorn
 from fastapi import FastAPI
 
+import lib.file_functions
+import src.ENUMS
+import src.llm.llm_provider
+import src.llm.workflow.agent_state
+import src.llm.workflow.workflow_manager
+import src.user_interface.gui
 from config import Configuration
-from lib.file_functions import (
-    get_files_by_extension_in_directory,
-    read_file_as_text_string,
-)
-from src.ENUMS import LLM_PROVIDER
-from src.llm.llm_provider import LLMProvider
-from src.llm.workflow.agent_state import AgentState
-from src.llm.workflow.workflow_manager import WorkflowManager
-from src.user_interface.gui import create_user_interface
 
 app = FastAPI()  # This is used to enable concurrent handling of requests.
 
@@ -22,8 +19,8 @@ async def create_workflow(*args, **kwargs):
     """
     Create a compiled StateGraph from langgraph.
     """
-    llm_provider = LLMProvider(LLM_PROVIDER.OLLAMA)
-    workflow_manager = WorkflowManager(llm_provider)
+    llm_provider = src.llm.llm_provider.LLMProvider(src.ENUMS.LLM_PROVIDER.OLLAMA)
+    workflow_manager = src.llm.workflow.workflow_manager.WorkflowManager(llm_provider)
     compiled_workflow = workflow_manager.state_graph.compile()
     return compiled_workflow
 
@@ -32,16 +29,16 @@ async def debug(*args, **kwargs):
     """
     A debug function used for quick development.
     """
-    text_files: list[str] = get_files_by_extension_in_directory(
+    text_files: list[str] = lib.file_functions.get_files_by_extension_in_directory(
         Configuration.prompt_folder_path, "txt"
     )  # NOTE: These are not going to be returned sorted.
     workflow = await create_workflow()
     workflow_results = []
     for text_file in text_files:
-        text_file_content: str = read_file_as_text_string(text_file)
-        # test_agent_query = asyncio.run(query_agents(text_file_content))
-        workflow_result = await workflow.ainvoke(AgentState(query=text_file_content))
-        workflow_results.append(workflow_result)
+        text_file_content: str | None = lib.file_functions.read_file_as_text_string(text_file)
+        if text_file_content is not None:
+          workflow_result = await workflow.ainvoke(src.llm.workflow.agent_state.AgentState(query=text_file_content))
+          workflow_results.append(workflow_result)
     return workflow_results
 
 
@@ -52,7 +49,7 @@ async def test(*args, **kwargs):
     print("test()")
 
 
-user_interface: gradio.Blocks = create_user_interface(
+user_interface: gradio.Blocks = src.user_interface.gui.create_user_interface(
     lambda *args, **kwargs: None
 )  # TODO: Remove static lambda function
 app = gradio.mount_gradio_app(

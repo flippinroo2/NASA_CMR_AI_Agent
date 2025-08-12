@@ -1,24 +1,24 @@
-from dataclasses import dataclass, field
+import dataclasses
 from typing import Any, NotRequired, Optional, TypedDict
 
-from pydantic import BaseModel, ConfigDict, Field
+import pydantic
 
 
-@dataclass
+@dataclasses.dataclass
 class __AgentState:
     query: str
-    # analysis_results: dict[str, Any] = field(default_factory=dict[str, Any])
-    api_requests: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
-    api_responses: list[list[dict[str, Any]]] = field(
+    # analysis_results: dict[str, Any] = dataclasses.field(default_factory=dict[str, Any])
+    api_requests: list[dict[str, Any]] = dataclasses.field(default_factory=list[dict[str, Any]])
+    api_responses: list[list[dict[str, Any]]] = dataclasses.field(
         default_factory=list[list[dict[str, Any]]]
     )
-    # context: ContextManager = field(default_factory=ContextManager)
+    # context: ContextManager = dataclasses.field(default_factory=ContextManager)
     current_task: Optional[str] = None
     final_response: Optional[str] = None
     intent: Optional[int] = None
     # memory: Any
     # messages: Any
-    sub_queries: list[str] = field(default_factory=list[str])
+    sub_queries: list[str] = dataclasses.field(default_factory=list[str])
 
 
 class _AgentState(TypedDict):
@@ -35,17 +35,17 @@ class _AgentState(TypedDict):
     sub_queries: NotRequired[list[str]]
 
 
-class AgentState(BaseModel):
+class AgentState(pydantic.BaseModel):
     query: str
-    api_requests: list[dict[str, Any]] = Field(default_factory=list[dict[str, Any]])
-    api_responses: list[list[dict[str, Any]]] = Field(
+    api_requests: list[dict[str, Any]] = pydantic.Field(default_factory=list[dict[str, Any]])
+    api_responses: list[list[dict[str, Any]]] = pydantic.Field(
         default_factory=list[list[dict[str, Any]]]
     )
-    current_task: Optional[str] = Field(default=None)
-    final_response: Optional[str] = Field(default=None)
-    intent: Optional[int] = Field(default=None)
-    sub_queries: list[str] = Field(default_factory=list[str])
+    current_task: Optional[str] = pydantic.Field(default=None)
+    final_response: Optional[str] = pydantic.Field(default=None)
+    intent: Optional[int] = pydantic.Field(default=None)
+    sub_queries: list[str] = pydantic.Field(default_factory=list[str])
 
-    model_config = ConfigDict(
+    model_config = pydantic.ConfigDict(
         arbitrary_types_allowed=True
     )  # TODO: Fix this because it's a easy solution, but maybe not the best. (I believe correct way is to define def __get_pydantic_core_schema__ within the ContextManager class... OR making that class a Pydantic model as well.)

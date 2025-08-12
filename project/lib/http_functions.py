@@ -1,7 +1,6 @@
 from typing import Any
 
-from aiohttp import ClientSession
-from aiohttp.client_exceptions import ClientResponseError, InvalidUrlClientError
+import aiohttp
 
 
 async def get_request(url: str, parameters: dict[str, Any] | None = None) -> Any:
@@ -25,14 +24,14 @@ async def get_request(url: str, parameters: dict[str, Any] | None = None) -> Any
         parameters = {}
     try:
         async with (
-            ClientSession() as session,
+            aiohttp.ClientSession() as session,
             session.get(url, params=parameters) as response,
         ):
             response.raise_for_status()
             return await response.json()
-    except ClientResponseError as exception:
+    except aiohttp.ClientResponseError as exception:
         print(f"get_request() - ClientResponseError: {exception}")
-    except InvalidUrlClientError as exception:
+    except aiohttp.InvalidUrlClientError as exception:
         print(f"get_request() - InvalidUrlClientError: {exception}")
     except TypeError as exception:
         print(f"get_request() - TypeError: {exception}")

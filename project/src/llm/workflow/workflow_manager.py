@@ -1,14 +1,16 @@
 from typing import Any, Callable
 
-from langchain.chat_models.base import _ConfigurableModel
-from langchain_core.language_models import BaseLLM
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.graph import StateGraph
+import langchain.chat_models.base
+import langchain_core.language_models
+import langgraph.checkpoint.memory
+import langgraph.graph
 
+import lib.file_functions
+import lib.time_functions
+import src.llm.agents.agent
+import src.llm.llm_provider
+import src.llm.tools.cmr
 from config import Configuration
-from lib.file_functions import write_dictionary_to_file
-from lib.time_functions import get_timestamp
-from src.llm.agents.agent import Agent
 from src.llm.agents.cmr_api_agent import CMRApiAgent
 from src.llm.agents.data_analysis_and_recommendation_agent import (
     DataAnalysisAndRecommendationAgent,
@@ -19,12 +21,6 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
 from src.llm.agents.response_synthesis_and_formatting_agent import (
     ResponseSynthesisAndFormattingAgent,
 )
-from src.llm.llm_provider import LLMProvider
-from src.llm.tools.cmr import (
-    query_cmr_autocomplete_endpoint,
-    query_cmr_collections_endpoint,
-    query_cmr_granules_endpoint,
-)
 from src.llm.workflow.agent_state import AgentState
 
 
@@ -33,11 +29,11 @@ class WorkflowManager:
     A class to used to handle the creation of a langgraph state graph and agents / agent states.
     """
 
-    _agents: list[Agent] = []
-    state_graph: StateGraph = StateGraph(AgentState)
+    _agents: list[src.llm.agents.agent.Agent] = []
+    state_graph: langgraph.graph.StateGraph = langgraph.graph.StateGraph(AgentState)
 
-    def __init__(self, llm_provider: LLMProvider) -> None:
-        self.llm: _ConfigurableModel | BaseLLM = llm_provider.get_llm()
+    def __init__(self, llm_provider: src.llm.llm_provider.LLMProvider) -> None:
+        self.llm: langchain.chat_models.base._ConfigurableModel | langchain_core.language_models.BaseLLM = llm_provider.get_llm()
 
         # Add nodes
         self._add_node_if_missing(
@@ -92,7 +88,7 @@ class WorkflowManager:
         Notes:
             TODO: This function needs to be fleshed out still.
         """
-        self.state_graph.compile(checkpointer=MemorySaver())
+        self.state_graph.compile(checkpointer=langgraph.checkpoint.memory.MemorySaver())
 
     async def _query_interpretation_and_validation_agent(
         self, state: AgentState
@@ -131,9 +127,9 @@ class WorkflowManager:
         )  # TODO: Do we want to actually cache the agents in this class though?
         agent.get_llm().bind(
             tools=[
-                query_cmr_autocomplete_endpoint,
-                query_cmr_collections_endpoint,
-                query_cmr_granules_endpoint,
+                src.llm.tools.cmr.query_cmr_autocomplete_endpoint,
+                src.llm.tools.cmr.query_cmr_collections_endpoint,
+                src.llm.tools.cmr.query_cmr_granules_endpoint,
             ]
         )  # NOTE: Binding the nasa tool... Should also create an output parser here
         new_agent_state: AgentState = await agent.process(state)
@@ -191,8 +187,8 @@ class WorkflowManager:
         Notes:
             TODO: Add a new parameter that allows the specification of a custom directory name and then use timestamps for each individual file. (For the purpose of multiple state logs within a single run.)
         """
-        curent_timestamp: int = get_timestamp()
-        write_dictionary_to_file(
+        curent_timestamp: int = lib.time_functions.get_timestamp()
+        lib.file_functions.write_dictionary_to_file(
             f"{Configuration.log_folder_path}/{curent_timestamp}/state.json",
             dict(state),
         )

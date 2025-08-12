@@ -1,38 +1,36 @@
 from typing import Any
 
 import chromadb
-from chromadb.api import ClientAPI
-from langchain_chroma import Chroma
-from langchain_core.embeddings import Embeddings
-from langchain_ollama.embeddings import OllamaEmbeddings
-from langgraph.graph import END, StateGraph
+import chromadb.api
+import langchain_chroma
+import langchain_core.embeddings
 
-# from pydantic import BaseModel
+# import langchain_ollama.embeddings
 
 
 class VectorDBManager:
-    chroma_client: ClientAPI
-    embeddings_model: Embeddings
-    vector_store: Chroma
+    chroma_client: chromadb.api.ClientAPI
+    embeddings_model: langchain_core.embeddings.Embeddings
+    vector_store: langchain_chroma.Chroma
 
     def __init__(self):
         self.chroma_client = chromadb.Client()
 
-    def create_vector_store(self, collection_name: str, embeddings: Embeddings):
+    def create_vector_store(self, collection_name: str, embeddings: langchain_core.embeddings.Embeddings):
         self.set_vector_store(
-            Chroma(collection_name=collection_name, embedding_function=embeddings)
+            langchain_chroma.Chroma(collection_name=collection_name, embedding_function=embeddings)
         )
 
     def get_vector_store(self):
         return self.vector_store
 
-    def set_vector_store(self, vector_store: Chroma):
+    def set_vector_store(self, vector_store: langchain_chroma.Chroma):
         self.vector_store = vector_store
 
     def get_embeddings_model(self):
         return self.embeddings_model
 
-    def set_embeddings_model(self, embeddings_model: Embeddings):
+    def set_embeddings_model(self, embeddings_model: langchain_core.embeddings.Embeddings):
         self.embeddings_model = embeddings_model
 
     def retrieve_relevant_context(self, state: dict[str, Any]) -> dict[str, Any]:
