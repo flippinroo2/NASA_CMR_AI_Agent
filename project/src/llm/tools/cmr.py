@@ -40,10 +40,10 @@ class CircuitBreaker:
 
 
 class AutocompleteEntry(pydantic.BaseModel):
-    score: float
-    type: str
-    value: str
-    fields: str
+    score: float = pydantic.Field()
+    type: str = pydantic.Field()
+    value: str = pydantic.Field()
+    fields: str = pydantic.Field()
 
 
 class CollectionEntry(pydantic.BaseModel):

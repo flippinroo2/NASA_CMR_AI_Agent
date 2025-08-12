@@ -19,6 +19,7 @@ class AutocompleteEntry:
     fields: str
 
 
+@dataclasses.dataclass
 class CollectionEntry:
     processing_level_id: str
     boxes: list

@@ -65,7 +65,8 @@ class Configuration:
         else:
             cls.base_endpoint = cls._test_endpoint
 
-        if not lib.file_functions.check_if_string_is_a_file(cls.prompt_folder_path):
+        is_prompt_folder_path_a_directory = lib.file_functions.check_if_string_is_a_directory(cls.prompt_folder_path)
+        if not is_prompt_folder_path_a_directory:
             cls.prompt_folder_path = f"project/{cls.prompt_folder_path}"  # TODO: Make this more dynamic instead of hard coding.
 
         # TODO: Maybe work on a more dynamic way to enable / disable langsmith.

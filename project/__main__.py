@@ -29,17 +29,18 @@ async def debug(*args, **kwargs):
     """
     A debug function used for quick development.
     """
-    text_files: list[str] = lib.file_functions.get_files_by_extension_in_directory(
+    text_files: list[str] | None = lib.file_functions.get_files_by_extension_in_directory(
         Configuration.prompt_folder_path, "txt"
     )  # NOTE: These are not going to be returned sorted.
-    workflow = await create_workflow()
-    workflow_results = []
-    for text_file in text_files:
-        text_file_content: str | None = lib.file_functions.read_file_as_text_string(text_file)
-        if text_file_content is not None:
-          workflow_result = await workflow.ainvoke(src.llm.workflow.agent_state.AgentState(query=text_file_content))
-          workflow_results.append(workflow_result)
-    return workflow_results
+    if text_files is not None:
+      workflow = await create_workflow()
+      workflow_results = []
+      for text_file in text_files:
+          text_file_content: str | None = lib.file_functions.read_file_as_text_string(text_file)
+          if text_file_content is not None:
+            workflow_result = await workflow.ainvoke(src.llm.workflow.agent_state.AgentState(query=text_file_content))
+            workflow_results.append(workflow_result)
+      return workflow_results
 
 
 async def test(*args, **kwargs):

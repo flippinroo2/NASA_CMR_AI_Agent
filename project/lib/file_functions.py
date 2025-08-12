@@ -144,7 +144,7 @@ def get_file_extension_from_filepath(uri: str) -> str:
 def get_files_by_extension_in_directory(
     directory_string: str = os.getcwd(),  # TODO: Make sure this is okay to call this function as a default argument.
     file_extension: list[str] | str | None = None,
-) -> list[str]:
+) -> list[str] | None:
     """
     Helper function to get a list of all files with a specified extension in a directory.
 
@@ -154,20 +154,32 @@ def get_files_by_extension_in_directory(
 
     Returns:
         list[str]: A list of all files with a specified extension in a directory.
+
+    Raises:
+        FileNotFoundError: Could not list files in the directory provided.
+        Exception: A catch-all exception for anything not covered above.
     """
     if file_extension is None:
-        file_extension = ["txt"]  # NOTE: Setting the default file extension to "txt"
+        print("get_files_by_extension_in_directory() - file_extension is None.")
+        return None
     file_list: list[str] = []
-    for file in os.listdir(directory_string):
-        full_file_path: str = f"{directory_string}/{file}"
-        if isinstance(file_extension, list):
-            for extension in file_extension:
-                if check_if_string_matches_file_extension(full_file_path, extension):
-                    file_list.append(full_file_path)
-        else:
-            if check_if_string_matches_file_extension(full_file_path, file_extension):
-                file_list.append(full_file_path)
-    return file_list
+    try:
+      for file in os.listdir(directory_string):
+          full_file_path: str = f"{directory_string}/{file}"
+          if isinstance(file_extension, list):
+              for extension in file_extension:
+                  if check_if_string_matches_file_extension(full_file_path, extension):
+                      file_list.append(full_file_path)
+          else:
+              if check_if_string_matches_file_extension(full_file_path, file_extension):
+                  file_list.append(full_file_path)
+      return file_list
+    except FileNotFoundError as exception:
+        print(f"get_files_by_extension_in_directory() - FileNotFoundError: {exception}")
+        return file_list
+    except Exception as exception:
+        print(f"get_files_by_extension_in_directory() - Exception: {exception}")
+        raise exception
 
 
 def get_parent_directory_name(directory_string: str, depth_upwards: int = 1) -> str:
@@ -319,9 +331,19 @@ def write_dictionary_to_file(
     directory_check: bool = check_if_string_is_a_directory(parent_directory)
     if not directory_check:
         create_directory(parent_directory)
-    formatted_string: str = json.dumps(
-        obj=dictionary_to_write, indent=2, sort_keys=True
-    )  # TODO: Fix this so that we don't perform the formatting twice... Once here and once in "write_stirng_to_file()"
+    try:
+      formatted_string: str = json.dumps(
+          obj=dictionary_to_write, indent=2, sort_keys=True
+      )  # TODO: Fix this so that we don't perform the formatting twice... Once here and once in "write_stirng_to_file()"
+    except TypeError as exception:
+        print(f"TypeError: {exception}")
+    except RecursionError as exception:
+        print(f"RecursionError: {exception}")
+    except ValueError as exception:
+        print(f"ValueError: {exception}")
+    except Exception as exception:
+        print(f"Exception: {exception}")
+        raise exception
     return write_string_to_file(uri=uri, text_to_write=formatted_string)
 
 

@@ -5,7 +5,7 @@ import langchain_core.language_models
 import langchain_core.language_models.base
 
 import lib.string_functions
-import src.llm.knowledge_graph
+import src.data.knowledge_graph
 from src.llm.workflow.agent_state import AgentState
 
 # NOTE: Wanted to use an abstract class here even though it isn't very useful at the moment to show my knowledge of how they work.
@@ -14,7 +14,7 @@ from src.llm.workflow.agent_state import AgentState
 # Abstract Agent class
 class Agent(ABC):
     _llm: langchain.chat_models.base._ConfigurableModel | langchain_core.language_models.BaseLLM
-    knowledge_graph: src.llm.knowledge_graph.KnowledgeGraph | None = (
+    knowledge_graph: src.data.knowledge_graph.KnowledgeGraph | None = (
         None  # TODO: Remove the None and actually implement a knowledge graph
     )
 

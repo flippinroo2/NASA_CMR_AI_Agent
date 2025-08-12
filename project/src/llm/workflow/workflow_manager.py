@@ -30,6 +30,7 @@ class WorkflowManager:
     """
 
     _agents: list[src.llm.agents.agent.Agent] = []
+    _compiled_time: int | None = None # TODO: Set this on first compile and use it for logging output folder (Format it better too)
     state_graph: langgraph.graph.StateGraph = langgraph.graph.StateGraph(AgentState)
 
     def __init__(self, llm_provider: src.llm.llm_provider.LLMProvider) -> None:
@@ -182,13 +183,14 @@ class WorkflowManager:
 
     def _log_workflow_state(self, state: AgentState) -> None:
         """
-        Helper function for logging the state of the workflow to a JSON file located a directory that is formatted by {LOG_FOLDER_PATH}/{curent_timestamp}
+        Helper function for logging the state of the workflow to a JSON file located a directory that is formatted by {LOG_FOLDER_PATH}/{current_timestamp}
 
         Notes:
             TODO: Add a new parameter that allows the specification of a custom directory name and then use timestamps for each individual file. (For the purpose of multiple state logs within a single run.)
         """
-        curent_timestamp: int = lib.time_functions.get_timestamp()
+        current_timestamp: int = lib.time_functions.get_timestamp()
+        serialized_state: dict[str, Any] = state.model_dump()
         lib.file_functions.write_dictionary_to_file(
-            f"{Configuration.log_folder_path}/{curent_timestamp}/state.json",
-            dict(state),
+            f"{Configuration.log_folder_path}/{current_timestamp}/state.json",
+            serialized_state,
         )
