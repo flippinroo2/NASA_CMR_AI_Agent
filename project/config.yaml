@@ -1,6 +1,6 @@
 AVAILABLE_LLM_PROVIDERS:
   - name: Anthropic
-DEBUG: True
+DEBUG: False
 ENABLE_STREAMING: True
 HOST: "0.0.0.0"
 LOG_FOLDER_PATH: "logs"

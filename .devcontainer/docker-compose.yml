@@ -1,11 +1,39 @@
-version: '3.8'
+volumes:
+  database: {}
+
+networks:
+  nasa_cmr_agent_network:
+    driver: bridge
+
 services:
+  neo4j:
+    container_name: nasa_cmr_agent_neo4j_container
+    image: neo4j:ubi9
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    volumes:
+      - database:/database
+    ports:
+      - 7474:7474
+      - 7687:7687
+    networks:
+      - nasa_cmr_agent_network
+
   ubuntu:
+    depends_on:
+      - neo4j
     container_name: nasa_cmr_agent_container
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Ubuntu.Dockerfile
     image: nasa_cmr_agent_image
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
     command: sleep infinity
     volumes:
       - .:/home/vscode/.devcontainer
+      - database:/home/vscode/database
+    networks:
+      - nasa_cmr_agent_network

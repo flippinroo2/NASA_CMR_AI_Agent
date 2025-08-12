@@ -10,3 +10,5 @@
 logs
 project/.venv
 project/logs
+**/__pycache__
+**/.ruff_cache

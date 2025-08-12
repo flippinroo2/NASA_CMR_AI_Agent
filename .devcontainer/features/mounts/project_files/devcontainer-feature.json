@@ -5,6 +5,11 @@
   "version": "0.0.1",
   "mounts": [
     {
+      "source": "../.gitignore",
+      "target": "/home/vscode/project/.gitignore",
+      "type": "bind"
+    },
+    {
       "source": "../Makefile",
       "target": "/home/vscode/Makefile",
       "type": "bind"
@@ -12,11 +17,6 @@
     {
       "source": "../README.md",
       "target": "/home/vscode/README.md",
-      "type": "bind"
-    },
-    {
-      "source": "../project/llm_examples",
-      "target": "/home/vscode/project/llm_examples",
       "type": "bind"
     },
     {
@@ -50,11 +50,6 @@
       "type": "bind"
     },
     {
-      "source": "../.gitignore",
-      "target": "/home/vscode/project/.gitignore",
-      "type": "bind"
-    },
-    {
       "source": "../project/config.py",
       "target": "/home/vscode/project/config.py",
       "type": "bind"
@@ -77,6 +72,11 @@
     {
       "source": "../project/pyproject.toml",
       "target": "/home/vscode/project/pyproject.toml",
+      "type": "bind"
+    },
+    {
+      "source": "../project/pytest.ini",
+      "target": "/home/vscode/project/pytest.ini",
       "type": "bind"
     },
     {

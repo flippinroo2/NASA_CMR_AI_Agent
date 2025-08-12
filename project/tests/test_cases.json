@@ -1,10 +1,6 @@
 [
     {
-        "input": "What is quantum computing?",
-        "expected": "Quantum computing uses qubits to perform complex calculations."
-    },
-    {
-        "input": "Explain the theory of relativity.",
-        "expected": "The theory of relativity describes the laws of physics in terms of space and time."
+        "input": "Why do you think 2024 had such powerful hurricanes towards the end of the year?",
+        "expected": ""
     }
 ]

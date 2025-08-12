@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import Mock
 
 from _pytest.fixtures import SubRequest
@@ -9,17 +8,14 @@ from pytest import fixture
 from src.ENUMS import LLM_PROVIDER
 from src.llm.agents.agent import Agent
 from src.llm.llm_provider import LLMProvider
-from src.llm.workflow.agent_state import AgentState
 from src.llm.workflow.workflow_manager import WorkflowManager
 from tests.test_data import MOCK_CMR_AUTOCOMPLETE_RESPONSE
 
 
 @fixture(scope="module")
-# @fixture(scope="module", params=[Agent])
 def get_fixture_agent(request: SubRequest):
-    # return agent_class(get_fixture_llm())
     agent_class: Agent = request.param
-    return agent_class(LLMProvider(LLM_PROVIDER.OLLAMA).get_llm())
+    return agent_class(LLMProvider(LLM_PROVIDER.OLLAMA).get_llm()) # type: ignore
 
 
 @fixture(scope="session")

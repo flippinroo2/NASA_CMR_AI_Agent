@@ -9,7 +9,7 @@
   "hostRequirements": {
     "cpus": 1,
     "gpu": "optional",
-    "storage": "15gb"
+    "storage": "25gb"
   },
   "dockerComposeFile": "./docker-compose.yml",
   "shutdownAction": "stopCompose",

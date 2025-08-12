@@ -33,3 +33,7 @@ tool ???
 variable ???
 visualizations ???
 grid ???
+
+## EXTRA NOTES
+
+You will notice I have specifically unpacked all of the imports to use "from <PACKAGE_NAME> import <Class>/<Function>". This was by design to ensure the highest performance without having to import extra items. (*Might not be necessary, but I think my JavaScript experience rubbed off there.*)

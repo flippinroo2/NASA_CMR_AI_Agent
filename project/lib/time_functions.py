@@ -1,5 +1,11 @@
-import time
+from time import time
 
 
 def get_timestamp() -> int:
-    return int(time.time())
+    """
+    Helper function for getting the current UNIX timestamp.
+
+    Returns:
+        int: The current UNIX timestamp.
+    """
+    return int(time())

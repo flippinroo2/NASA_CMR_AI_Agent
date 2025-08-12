@@ -4,7 +4,6 @@ from src.llm.agents.query_interpretation_and_validation_agent import (
     QueryInterpretationAndValidationAgent,
 )
 from src.llm.workflow.agent_state import AgentState
-from tests.fixtures import get_fixture_agent
 from tests.test_data import TEST_AGENT_STATE, TEST_QUERY
 
 

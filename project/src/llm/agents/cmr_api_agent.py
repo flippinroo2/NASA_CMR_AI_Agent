@@ -1,100 +1,157 @@
-from asyncio import gather
+from asyncio import gather, run
+from types import CoroutineType
 from typing import Any
 
 from httpx import AsyncClient
 from langchain.agents import AgentExecutor, ZeroShotAgent
 from langchain.chains.llm import LLMChain
-from langchain.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.runnables import RunnableSequence, RunnableSerializable
+from langchain.output_parsers import PydanticOutputParser
+from langchain.prompts import PromptTemplate
+from langchain_core.prompts import BasePromptTemplate
+from langchain_core.tools import BaseTool
 
-from src.data.api_manager import CMR_ENDPOINTS, APIManager
 from src.llm.agents.agent import Agent
-from src.llm.tools.cmr import query_cmr_autocomplete_endpoint
+from src.llm.tools.cmr import (
+    AutocompleteEntry,
+    CMRQueryParameters,
+    CollectionEntry,
+    query_cmr_autocomplete_endpoint,
+    query_cmr_collections_endpoint,
+    query_cmr_granules_endpoint,
+)
 from src.llm.workflow.agent_state import AgentState
 
+"""
+1st - Run a collections request to get datasets
+2nd - Use those values to determine arguments for the granules request
+"""
 
 class CMRApiAgent(Agent):
     def __init__(self, llm):
         super().__init__(llm)
         self.session = AsyncClient()
 
-    async def process(self, state: AgentState):
-        query_intent = state.intent
-        sub_queries = state.sub_queries
+    async def process(self, state: AgentState) -> AgentState:
+        query_intent: int | None = state.intent
+        sub_queries: list[str] = state.sub_queries
         if len(sub_queries):
-            cmr_queries = self._build_cmr_requests_from_subqueries(
+            cmr_queries = await self._build_cmr_requests_from_subqueries(
                 sub_queries, query_intent
             )
             results = await gather(*cmr_queries)
             cleaned_results = [result for result in results if result]
-            return {**state.model_dump(), "api_responses": cleaned_results}
-        return AgentState(**{**state.model_dump(), "api_responses": []})
+            return state.model_copy(update={"api_responses": cleaned_results})
+        return state.model_copy(update={"api_responses": []})
 
-    def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
+    async def _build_cmr_requests_from_subqueries(self, subqueries, query_intent):
         # TODO: If looping through here it would make sense to have an intent for each sub-query???
         return_value = []
-        for query in subqueries:
-            return_value.append(self._build_cmr_request_from_query(query, query_intent))
+        for subquery in subqueries:
+            query_parameters: CMRQueryParameters = (
+                await self._extract_cmr_request_parameters_from_query(subquery)
+            )
+            cmr_request: CoroutineType[
+                Any, Any, list[AutocompleteEntry | CollectionEntry]
+            ] = self._send_cmr_api_request(subquery, query_parameters)
+            return_value.append(cmr_request)
         return return_value
 
-    def _build_cmr_request_from_query(self, query, query_intent):
-        # TODO: Expand this function here to actually handle parameters better.
-        endpoint = CMR_ENDPOINTS.get_item_from_index(query_intent)
-        query_parameters = self._build_cmr_request_parameters(query, query_intent)
-        api_query = APIManager.query_cmr(
-            CMR_ENDPOINTS.AUTOCOMPLETE, params={"q": query_parameters}
+    async def _send_cmr_api_request(
+        self, query, query_parameters
+    ) -> list[AutocompleteEntry | CollectionEntry]:
+        tools_list: list[BaseTool] = [
+            query_cmr_autocomplete_endpoint,
+            query_cmr_collections_endpoint,
+            query_cmr_granules_endpoint,
+        ]
+        tool_string: str = "\n".join(
+            f"{tool.name}: {tool.description}" for tool in tools_list
         )
-        return_value = api_query
-        return return_value
+        tool_names: str = ", ".join(tool.name for tool in tools_list)
 
-    def _call_tool(self, query):
-        agent_scratchpad = ""
-        template = f"""You are a system that must ONLY respond by calling the query_cmr_autocomplete_endpoint tool.
+        template = """
+        You are a system that must ONLY respond by calling a tool and never answer directly.
 
-        The tool will then provide the answer. Never produce plain natural language answers yourself.
+        You have access to the following tools:
+        {tools}
 
-        Query: {input}
-        {agent_scratchpad}"""
-        chat_prompt_template: ChatPromptTemplate = ChatPromptTemplate.from_template(
-            template
-        )
-        chain: RunnableSerializable[dict[str, Any], str] = (
-            chat_prompt_template | self.get_llm()
-        )
+        Use the following format:
+        Thought: reflect on what to do
+        Action: one of [{tool_names}]
+        Action Input: the input to the action
 
-        response: str | Any = chain.invoke({"query": chat_prompt_template})
-        print(response)
+        Observation: the result of the action
+        ... (this Thought/Action/Observation can repeat multiple times)
+        Final Answer: the final answer (only if no tool use is needed)
 
-        prompt_template: PromptTemplate = PromptTemplate(
-            input_variables=["input", "agent_scratchpad"], template=template
-        )
-        # prompt_template: PromptTemplate = PromptTemplate.from_template(template)
+        Question: {input}
+        {agent_scratchpad}
+        """
+        prompt_template: BasePromptTemplate[Any] = PromptTemplate(
+            input_variables=["input", "agent_scratchpad", "tools", "tool_names"],
+            template=template,
+        ).partial(tools=tool_string, tool_names=tool_names)
         llm_chain: LLMChain = LLMChain(llm=self.get_llm(), prompt=prompt_template)
-        agent = ZeroShotAgent(
-            llm_chain=llm_chain, allowed_tools=["query_cmr_autocomplete_endpoint"]
+        agent: ZeroShotAgent = ZeroShotAgent(
+            llm_chain=llm_chain, allowed_tools=[tool.name for tool in tools_list]
         )
-        # executor = AgentExecutor.from_agent_and_tools()
-        executor = AgentExecutor(
-            agent=agent, tools=[query_cmr_autocomplete_endpoint], verbose=True
+        executor: AgentExecutor = AgentExecutor(
+            verbose=True,
+            agent=agent,
+            tools=tools_list,
+            handle_parsing_errors=True,
         )
-        test = executor.invoke({"input": query})
-        return response
+        agent_executor_response: dict[str, Any] = await executor.ainvoke(
+            {"input": (query)}
+        )
 
-    def _infer_parameters_from_query(self, query):
-        prompt = f"""Extract the following parameters from this query:
-        - Temporal range (start/end dates)
-        - Spatial bounds (region, coordinates)
-        - Data types (satellite, ground-based, etc.)
-        - Research purpose
+        return agent_executor_response.get(
+            "output", []
+        )  # NOTE: Returning empty list by default instead of None
 
+    async def _extract_cmr_request_parameters_from_query(
+        self, query
+    ) -> CMRQueryParameters:
+        """
+        NOTE: This function doesn't really seem necessary. It would probably be more valuable to use the "CMRSearchParameters" object to dynamically choose what to search on?
+        """
+        parser: PydanticOutputParser[CMRQueryParameters] = PydanticOutputParser(
+            pydantic_object=CMRQueryParameters
+        )
+        template = """Extract the following parameters from this query:
+
+        - keyword: The search term used to query the CMR API
+
+        - page_size: Number of results per page
+
+        - page_num: The page number to return
+
+        - offset: As an alternative to page_num, a 0-based offset of individual results may be specified.
+
+        - scroll: A boolean flag (true/false) that allows all results to be retrieved efficiently. page_size is supported with scroll while page_num and offset are not. If scroll is true then the first call of a scroll session sets the page size; page_size is ignored on subsequent calls
+
+        - sort_key: Indicates one or more Fields to sort on
+
+        - pretty: Return formatted results if set to true
+
+        - token: Specifies a user token from EDL or Launchpad for use as authentication. Using the standard Authorization header is the prefered way to supply a token. This parameter may be deprecated in the future
+  
+        {format_instructions}
+    
         Query: {query}
+        """
+        format_instructions: str = parser.get_format_instructions()
+        prompt_template = PromptTemplate(
+            input_variables=["query"],
+            template=template,
+            partial_variables={"format_instructions": format_instructions},
+        )
 
-        Return as JSON with null values for any missing parameters."""
-        response = self._invoke(prompt)
-        # return json.loads(response) # NOTE: Commenting out because it was causing errors
-        return response
+        chain = prompt_template | self.get_llm() | parser
+        query_parameters = chain.invoke({"query": query})
+        return query_parameters
 
-    def _build_cmr_request_parameters(self, query, query_intent):
+    async def _implement_query_intent(self, query, query_intent) -> str:
         # TODO: Actually make this do something...
         match query_intent:
             case 1:
