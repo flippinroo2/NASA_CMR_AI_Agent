@@ -1,8 +1,11 @@
 from typing import Any
 
+from src.llm.tools.cmr import CMRQueryParameters
 from src.llm.workflow.agent_state import AgentState
 
 TEST_QUERY: str = "Why do you think 2024 had such powerful hurricanes towards the end of the year?"  # TODO: Load the json file with test cases instead of using this hard coded string here.
+
+TEST_QUERY_PARAMETERS = CMRQueryParameters(keyword=TEST_QUERY)
 
 TEST_AGENT_STATE: AgentState = AgentState(query=TEST_QUERY)
 

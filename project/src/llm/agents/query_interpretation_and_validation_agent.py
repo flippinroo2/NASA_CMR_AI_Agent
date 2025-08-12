@@ -1,11 +1,22 @@
-from src.ENUMS import CMR_QUERY_INTENTION
 from src.llm.agents.agent import Agent
-from src.llm.knowledge_graph import KnowledgeGraph
 from src.llm.workflow.agent_state import AgentState
 
 
 class QueryInterpretationAndValidationAgent(Agent):
-    def _get_query_intent(self, query: str) -> int | None:
+    async def process(self, state: AgentState) -> AgentState:
+        query: str = state.query
+        if query is None:
+            raise ValueError(
+                "WorkflowManager.intent_classifier - There was no query in AgentState"
+            )
+        enriched_query = await self._enrich_query_with_context(state)
+        intent = await self._get_query_intent(enriched_query)
+        sub_queries = await self._identify_sub_queries(enriched_query)
+        return AgentState(
+            **{**state.model_dump(), "intent": intent, "sub_queries": sub_queries}
+        )
+
+    async def _get_query_intent(self, query: str) -> int | None:
         prompt = f"""Classify the following query into one of these categories:
         1. Exploratory request
         2. Specific data request
@@ -27,7 +38,7 @@ class QueryInterpretationAndValidationAgent(Agent):
                 f"QueryInterpretationAndValidationAgent._get_query_intent() - Error: {e}"
             )
 
-    def _enrich_query_with_context(self, state: AgentState) -> str:
+    async def _enrich_query_with_context(self, state: AgentState) -> str:
         # TODO: Add context management here
         # _context_manager = state.context
         # _relevant_context = _context_manager.get_relevant_context(
@@ -36,7 +47,7 @@ class QueryInterpretationAndValidationAgent(Agent):
         relevant_context = state.query
         return f"{state.query}\n\nRelevant context: {relevant_context}"
 
-    def _identify_sub_queries(self, query: str) -> list[str]:
+    async def _identify_sub_queries(self, query: str) -> list[str]:
         _prompt = f"""Break this complex query into simpler sub-queries:
         {query}
 
@@ -48,16 +59,3 @@ class QueryInterpretationAndValidationAgent(Agent):
         identified_subqueries = llm_output.splitlines()
         # TODO: Do some type of validation here to ensure we get a list of strings back.
         return identified_subqueries
-
-    def process(self, state: AgentState) -> AgentState:
-        query: str = state.query
-        if query is None:
-            raise ValueError(
-                "WorkflowManager.intent_classifier - There was no query in AgentState"
-            )
-        enriched_query = self._enrich_query_with_context(state)
-        intent = self._get_query_intent(enriched_query)
-        sub_queries = self._identify_sub_queries(enriched_query)
-        return AgentState(
-            **{**state.model_dump(), "intent": intent, "sub_queries": sub_queries}
-        )

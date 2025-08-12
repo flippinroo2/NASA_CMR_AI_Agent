@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from langchain.chat_models.base import _ConfigurableModel
 from langchain_core.language_models import BaseLLM
+from langchain_core.language_models.base import (
+    LanguageModelInput,
+)
 
 from lib.string_functions import replace_double_newline
 from src.llm.knowledge_graph import KnowledgeGraph
@@ -22,7 +24,7 @@ class Agent(ABC):
         self._llm = llm
         # self.knowledge_graph = KnowledgeGraph() # TODO: Re-enable knowledge graph
 
-    def _invoke(self, query: str) -> str:
+    def _invoke(self, query: LanguageModelInput) -> str:
         llm_response = self._llm.invoke(query)
         sanitized_llm_response = self._sanitize_llm_output(llm_response)
         return sanitized_llm_response
@@ -38,5 +40,5 @@ class Agent(ABC):
         return self._llm
 
     @abstractmethod
-    def process(self, state: AgentState) -> AgentState:
+    async def process(self, state: AgentState) -> AgentState:
         pass

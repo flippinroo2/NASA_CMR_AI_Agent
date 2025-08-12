@@ -1,14 +1,9 @@
-import asyncio
-import json
-from dataclasses import asdict, dataclass, field, fields
-
+from dataclasses import dataclass, field, fields
 from typing import Any
-from src.ENUMS import CMR_ENDPOINTS
-import aiohttp
-import requests
-from aiohttp.client_exceptions import InvalidUrlClientError
 
 from config import Configuration
+from lib.http_functions import get_request
+from src.ENUMS import CMR_ENDPOINTS
 
 # NOTE: I think this was a bit overengineered. In the beginning it was tough to understand the structure of the CMR API.
 
@@ -17,7 +12,6 @@ from config import Configuration
 
 
 # TODO: Look into if typeddict would be better (or if this amount of structure is even necessary?) because they're more performant than dataclass at runtime... and not all properties are included from the actual responses.
-@dataclass()
 class AutocompleteEntry:
     score: float
     type: str
@@ -25,7 +19,6 @@ class AutocompleteEntry:
     fields: str
 
 
-@dataclass(init=False)
 class CollectionEntry:
     processing_level_id: str
     boxes: list
@@ -51,7 +44,6 @@ class CollectionEntry:
         self.extra_data = kwargs
 
 
-@dataclass
 class FeedItem:
     updated: str | None = field(default=None)
     id: str | None = field(default=None)
@@ -59,7 +51,6 @@ class FeedItem:
     entry: list[dict[str, Any]] = field(default_factory=list[dict[str, Any]])
 
 
-@dataclass
 class SearchResponse:
     feed: FeedItem
 
@@ -89,20 +80,6 @@ class CMRSearchParameters:
 
 class APIManager:
     @staticmethod
-    async def get_request(url: str, params=None) -> Any:
-        try:
-            async with (
-                aiohttp.ClientSession() as session,
-                session.get(url, params=params) as response,
-            ):
-                response.raise_for_status()
-                return await response.json()
-        except InvalidUrlClientError as e:
-            print(f"APIManager.async_get_request() - InvalidUrlClientError: {e}")
-        except Exception as e:
-            print(f"APIManager.async_get_request() - Exception: {e}")
-
-    @staticmethod
     async def query_cmr(
         endpoint: CMR_ENDPOINTS | str, params: dict[str, Any] = {}, **kwargs
     ):
@@ -114,7 +91,7 @@ class APIManager:
             }  # TODO: Fix this. It's really badly written and just done to brute force the LLM to work.
         base_url = Configuration.base_endpoint
         url = f"{base_url}{endpoint.value}.json"  # TODO: Fix error here.
-        response = await APIManager.get_request(url, params=params)
+        response = await get_request(url, params=params)
         if response is not None:
             return_value: Any = response
             return_value = APIManager._get_search_entry_list(response)
@@ -135,7 +112,7 @@ class APIManager:
         # NOTE: This function seems redundant and probably not necessary.
         base_url = Configuration.base_endpoint
         url: str = f"{base_url}{CMR_ENDPOINTS.COLLECTIONS.value}.json"
-        response = await APIManager.get_request(url, params=params)
+        response = await get_request(url, params=params)
         feed_entry_list = APIManager._get_search_entry_list(response)
         for feed_entry in feed_entry_list:
             feed_entry_class: CollectionEntry = CollectionEntry(

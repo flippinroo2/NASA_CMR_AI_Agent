@@ -1,13 +1,9 @@
 from src.llm.agents.agent import Agent
-from src.llm.knowledge_graph import KnowledgeGraph
 from src.llm.workflow.agent_state import AgentState
 
 
 class DataAnalysisAndRecommendationAgent(Agent):
-    def _invoke(self, query: str):
-        return self.llm.invoke(query)
-
-    def process(self, state: AgentState) -> AgentState:
+    async def process(self, state: AgentState) -> AgentState:
         query: str | None = state.query
         if query is None:
             raise ValueError(
@@ -16,5 +12,5 @@ class DataAnalysisAndRecommendationAgent(Agent):
         best_datasets = self._determine_best_datasets(query)
         return {**state}
 
-    def _determine_best_datasets(self, query: str) -> list[str]:
+    async def _determine_best_datasets(self, query: str) -> list[str]:
         return self.knowledge_graph.get_best_datasets(query)

@@ -78,11 +78,22 @@ else
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Python Debugger: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "env": {
+        "PYTHONPATH": "/home/vscode/project"
+      },
+      "python": "/home/vscode/project/.venv/bin/python",
+      "program": "\${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
       "name": "NASA CMR AI Agent - __main__.py",
       "type": "debugpy",
       "request": "launch",
       "preLaunchTask": "Ollama - Pull gemma3:latest",
-      "cwd": "/home/vscode/project",
       "python": "/home/vscode/project/.venv/bin/python",
       "program": "/home/vscode/project/__main__.py",
       "console": "integratedTerminal",
@@ -93,12 +104,28 @@ else
       "type": "debugpy",
       "request": "launch",
       "preLaunchTask": "Ollama - Pull gemma3:latest",
-      "cwd": "/home/vscode/project",
       "python": "/home/vscode/project/.venv/bin/python",
       "console": "integratedTerminal",
       "module": "uvicorn",
       "args": [
-        "__init__:app",
+        "project/__init__:app",
+      ],
+      "justMyCode": false
+    },
+    {
+      // TODO: Enable breakpoints on errors / failed tests
+      "name": "NASA CMR AI Agent - Run Tests",
+      "type": "debugpy",
+      "request": "launch",
+      "preLaunchTask": "Ollama - Pull gemma3:latest",
+      "cwd": "/home/vscode/project",
+      "python": "/home/vscode/project/.venv/bin/python",
+      "console": "integratedTerminal",
+      "module": "unittest",
+      "args": [
+        "discover",
+        "-s",
+        "tests"
       ],
       "justMyCode": false
     }

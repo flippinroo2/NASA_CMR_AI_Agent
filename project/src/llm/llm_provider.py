@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import Any, Type, TypeVar
+from typing import Type, TypeVar
 
 from langchain.chat_models import init_chat_model
 from langchain.chat_models.base import _ConfigurableModel
@@ -13,17 +12,34 @@ T_BaseLLM = TypeVar("T_BaseLLM", bound=Type[BaseLLM])
 
 
 class LLMProvider:
+    """
+    Class used for handling connections to different LLMs
+    """
+
     _llm: _ConfigurableModel | BaseLLM | None = None
     _llm_class: Type[BaseLLM] = BaseLLM
 
-    def __init__(self, llm_provider: LLM_PROVIDER):
+    def __init__(self, llm_provider: LLM_PROVIDER) -> None:
         if llm_provider == LLM_PROVIDER.OLLAMA:
             self._llm_class = OllamaLLM
         if llm_provider == LLM_PROVIDER.LM_STUDIO:
-            self._llm_class = OpenAI  # TODO: Fix this inside the get_llm() function, because an API key must be passed in... Also the other parameters to make it act as if it is an OpenAI LLM
+            self._llm_class = OpenAI  # TODO: This needs to work similar to an OpenAI model, however, the parameters will point it to a localhost URL instead.
 
-    # TODO: Remove hard-coded LLM name and fix type safety stuff
-    def get_llm(self, model_name="gemma3:latest") -> _ConfigurableModel | BaseLLM:
+    def get_llm(
+        self, model_name: str = "gemma3:latest"
+    ) -> _ConfigurableModel | BaseLLM:
+        """
+        Returns the value of the _llm variable.
+
+        Args:
+            model_name (str): The name of the model to initialize.
+
+        Returns:
+            The value of the _llm variable.
+
+        Notes:
+            TODO: Expand this function to handle API keys, and other parameters based on the LLM_PROVIDER passed in.
+        """
         if self._llm is not None:
             return self._llm
         if self._llm_class is None:
@@ -31,17 +47,35 @@ class LLMProvider:
         else:
             try:
                 self._llm = self._llm_class(model=model_name)  # type: ignore
-            except Exception as e:
-                print(f"LLMProvider.get_llm() - Exception: {e}")
-                raise e
+            except Exception as exception:
+                print(f"LLMProvider.get_llm() - Exception: {exception}")
+                raise exception
         return self._llm
 
     def _get_dynamic_llm(self, model_name) -> _ConfigurableModel:
+        """
+        Dynamically initialize a chat model based on model name.
+
+        Args:
+            model_name: The name of the model to initialize.
+
+        Returns:
+            The initialized chat model.
+        """
         try:
             return init_chat_model(model_name=model_name)
-        except Exception as e:
-            print(f"LLMProvider._get_dynamic_llm() - Exception: {e}")
-            raise e
+        except Exception as exception:
+            print(f"LLMProvider._get_dynamic_llm() - Exception: {exception}")
+            raise exception
 
     def set_llm(self, llm: _ConfigurableModel | BaseLLM) -> None:
+        """
+        Sets the value of the _llm variable.
+
+        Args:
+            llm: The value to set the _llm variable to.
+
+        Returns:
+            None
+        """
         self._llm = llm

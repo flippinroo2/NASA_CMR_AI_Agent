@@ -5,6 +5,11 @@
 
 all: install ollama_start
 
+CURRENT_DIRECTORY:=$(shell pwd)
+dev:
+	@echo "Opening project in devcontainer"
+	code --folder-uri vscode-remote://dev-container+${CURRENT_DIRECTORY}
+
 install: ollama_install project_install
 	@echo "Installed devcontainer..."
 

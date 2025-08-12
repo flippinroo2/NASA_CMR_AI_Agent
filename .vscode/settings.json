@@ -1,8 +1,12 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ruff": "explicit"
+  },
   "explorer.autoReveal": true,
   "makefile.configureOnOpen": false,
   "python.analysis.diagnosticSeverityOverrides": {
     "reportShadowImports": "none",
     "shadowedImport": "none"
-  }
+  },
+  "ruff.fixAll": true,
 }

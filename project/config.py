@@ -1,6 +1,5 @@
 import os
 import threading
-from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar
 
@@ -138,7 +137,7 @@ class Configuration:
     @classmethod
     def _set_env_file_values(cls) -> None:
         env_file_values: dict[str, str | None] = get_env_file_values()
-        credentials: str | None = env_file_values.get("CREDENTIALS", None)
+        credentials: str | None = env_file_values.get("CREDENTIALS")
         with cls._lock:
             if credentials is not None and credentials != "":
                 print("TODO: Handle credentials here")  # TODO: Handle credentials here
