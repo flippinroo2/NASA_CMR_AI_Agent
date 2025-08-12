@@ -40,11 +40,10 @@ async def debug(*args, **kwargs):
     for text_file in text_files:
         text_file_content: str = read_file_as_text_string(text_file)
         # test_agent_query = asyncio.run(query_agents(text_file_content))
-        workflow_result = await workflow.ainvoke(
-            AgentState(query=text_file_content)
-        )
+        workflow_result = await workflow.ainvoke(AgentState(query=text_file_content))
         workflow_results.append(workflow_result)
     return workflow_results
+
 
 async def test(*args, **kwargs):
     """
@@ -52,10 +51,13 @@ async def test(*args, **kwargs):
     """
     print("test()")
 
+
 user_interface: gradio.Blocks = create_user_interface(
-    lambda *args, **kwargs: None, lambda *args, **kwargs: None
-)  # TODO: Remove static lambda functions
-app = gradio.mount_gradio_app(app, user_interface, path="") # NOTE: Creating a gradio application to be used as the user interface.
+    lambda *args, **kwargs: None
+)  # TODO: Remove static lambda function
+app = gradio.mount_gradio_app(
+    app, user_interface, path=""
+)  # NOTE: Creating a gradio application to be used as the user interface.
 
 if __name__ == "__main__":
     if Configuration.is_debug_mode_activated:
@@ -64,4 +66,6 @@ if __name__ == "__main__":
         debut_output = asyncio.run(debug())
         print("END")
     else:
-        uvicorn.run(app, host=Configuration.host, port=Configuration.port) # NOTE: Running the gradio application with uvicorn to allow for concurrency.
+        uvicorn.run(
+            app, host=Configuration.host, port=Configuration.port
+        )  # NOTE: Running the gradio application with uvicorn to allow for concurrency.

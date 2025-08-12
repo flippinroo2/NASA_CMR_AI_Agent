@@ -23,7 +23,7 @@ langchain-deepseek = "^0.1.4"
 langchain-nvidia-ai-endpoints = "^0.3.14"
 langchain-huggingface = "^0.3.1"
 langchain-mistralai = "^0.2.11"
-langchain-aws = "^0.2.30"
+langchain-aws = "^0.2.30" # NOTE: Had to remove this in order to create a requirements.txt using poetry's export command.
 langchain-google-genai = "^2.1.9"
 langchain-openai = "^0.3.28"
 langchain-anthropic = "^0.3.18"
@@ -51,7 +51,6 @@ debugpy = "^1.8.1"
 disable = ["shadowed-imports"]
 
 [tool.pyright]
-# https://github.com/microsoft/pyright/blob/main/docs/configuration.md
 exclude = [".cache"]
 reportShadowedImports = false
 useLibraryCodeForTypes = true
@@ -72,8 +71,3 @@ ignore = ['F401', 'E501', 'W291', 'W292', 'W293']
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-# [tool.pytest.ini_options]
-# markers = [
-#   "type_testing: Tests that are used for type checking"
-# ]
