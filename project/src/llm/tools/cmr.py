@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import langchain.tools
 import pydantic
@@ -66,7 +66,9 @@ class FeedItem(pydantic.BaseModel):
     updated: str | None = pydantic.Field(default=None)
     id: str | None = pydantic.Field(default=None)
     title: str | None = pydantic.Field(default=None)
-    entry: list[dict[str, Any]] = pydantic.Field(default_factory=list[dict[str, Any]])
+    entry: list[AutocompleteEntry | CollectionEntry] = pydantic.Field(
+        default_factory=list[AutocompleteEntry | CollectionEntry]
+    )
 
 
 class SearchResponse(pydantic.BaseModel):
@@ -114,10 +116,12 @@ class CMRQueryParameters(pydantic.BaseModel):
     token: Specifies a user token from EDL or Launchpad for use as authentication. Using the standard Authorization header is the prefered way to supply a token. This parameter may be deprecated in the future
     """
 
-    keyword: str | None = pydantic.Field(
-        default=None, description="The search term used to query the CMR API"
+    keyword: str = pydantic.Field(
+        description="The search term used to query the CMR API"
     )
-    page_size: int = pydantic.Field(default=10, description="Number of results per page")
+    page_size: int = pydantic.Field(
+        default=10, description="Number of results per page"
+    )
     page_num: int = pydantic.Field(default=1, description="The page number to return")
     offset: int = pydantic.Field(
         default=0,
@@ -156,7 +160,7 @@ class CMRAutocompleteEndpointParameters(pydantic.BaseModel):
     response_format="content",
 )
 @CircuitBreaker(failure_threshold=5, recovery_timeout=60).protect
-async def query_cmr_autocomplete_endpoint(query: str) -> list[AutocompleteEntry] | None:
+async def query_cmr_autocomplete_endpoint(query: str) -> list[AutocompleteEntry]:
     """
     Sends an HTTP request to the /autocomplete endpoint of the NASA Common Metadata Repository API and returns the response.
 
@@ -173,10 +177,10 @@ async def query_cmr_autocomplete_endpoint(query: str) -> list[AutocompleteEntry]
     )
     if response is not None:
         search_response: SearchResponse = SearchResponse(**response)
-        autocomplete_entries: list[AutocompleteEntry] = [
-            AutocompleteEntry(**entry) for entry in search_response.feed.entry
-        ]
-        return autocomplete_entries
+        return cast(
+            list[AutocompleteEntry], search_response.feed.entry
+        )  # NOTE: Doing this here to fix the type checking warnings.
+    return []
 
 
 class CMREndpointParameters(pydantic.BaseModel):
@@ -196,7 +200,7 @@ class CMREndpointParameters(pydantic.BaseModel):
     response_format="content",
 )
 @CircuitBreaker(failure_threshold=5, recovery_timeout=60).protect
-async def query_cmr_collections_endpoint(keyword: str):
+async def query_cmr_collections_endpoint(keyword: str) -> list[CollectionEntry]:
     """
     Sends an HTTP request to the /collections endpoint of the NASA Common Metadata Repository API and returns the response.
 
@@ -213,10 +217,10 @@ async def query_cmr_collections_endpoint(keyword: str):
     )
     if response is not None:
         search_response: SearchResponse = SearchResponse(**response)
-        collection_entries: list[CollectionEntry] = [
-            CollectionEntry(**entry) for entry in search_response.feed.entry
-        ]
-        return collection_entries
+        return cast(
+            list[CollectionEntry], search_response.feed.entry
+        )  # NOTE: Doing this here to fix the type checking warnings.
+    return []
 
 
 @langchain.tools.tool(
