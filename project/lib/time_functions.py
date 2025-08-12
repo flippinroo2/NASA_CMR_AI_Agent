@@ -1,4 +1,4 @@
-from time import time
+import time
 
 
 def get_timestamp() -> int:
@@ -8,4 +8,4 @@ def get_timestamp() -> int:
     Returns:
         int: The current UNIX timestamp.
     """
-    return int(time())
+    return int(time.time())

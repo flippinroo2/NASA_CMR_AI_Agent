@@ -1,14 +1,14 @@
+import enum
 import os
 import threading
-from enum import Enum
 from typing import Any, ClassVar
 
-from lib.enum_functions import safe_get_enum_value
-from lib.environment_functions import get_env_file_values
-from lib.file_functions import check_if_string_is_a_file, read_yaml_file_as_dictionary
+import lib.enum_functions
+import lib.environment_functions
+import lib.file_functions
 
 
-class CONFIGURATION_VALUE_ENUM(Enum):
+class CONFIGURATION_VALUE_ENUM(enum.Enum):
     AVAILABLE_LLM_PROVIDERS = "available_llm_providers"
     DEBUG = "is_debug_mode_activated"
     ENABLE_STREAMING = "is_streaming_enabled"
@@ -26,7 +26,7 @@ class CONFIGURATION_VALUE_ENUM(Enum):
     USE_LANGSMITH = "should_langsmith_be_used"
 
 
-class ENVIRONMENT_VARIABLE_ENUM(Enum):
+class ENVIRONMENT_VARIABLE_ENUM(enum.Enum):
     CONFIGURATION_FILEPATH = "configuration_filepath"
     CREDENTIALS = "credentials"
 
@@ -65,7 +65,7 @@ class Configuration:
         else:
             cls.base_endpoint = cls._test_endpoint
 
-        if not check_if_string_is_a_file(cls.prompt_folder_path):
+        if not lib.file_functions.check_if_string_is_a_file(cls.prompt_folder_path):
             cls.prompt_folder_path = f"project/{cls.prompt_folder_path}"  # TODO: Make this more dynamic instead of hard coding.
 
         # TODO: Maybe work on a more dynamic way to enable / disable langsmith.
@@ -81,7 +81,7 @@ class Configuration:
     @classmethod
     def _get_configuration_file_content(cls) -> dict[str, Any] | None:
         configuration_file_content: dict[str, Any] | None = (
-            read_yaml_file_as_dictionary(cls.configuration_filepath)
+            lib.file_functions.read_yaml_file_as_dictionary(cls.configuration_filepath)
         )
         if configuration_file_content is not None:
             return configuration_file_content
@@ -89,14 +89,14 @@ class Configuration:
             print(
                 f"Attempting to read configuration file from project/{cls.configuration_filepath}..."
             )
-        configuration_file_content = read_yaml_file_as_dictionary(
+        configuration_file_content = lib.file_functions.read_yaml_file_as_dictionary(
             f"project/{cls.configuration_filepath}"
         )  # TODO: Make this a bit more dynamic instead of hard coding.
         if configuration_file_content is not None:
             return configuration_file_content
         if cls.is_debug_mode_activated:
             print("Attempting to read configuration file from config.yaml...")
-        return read_yaml_file_as_dictionary(
+        return lib.file_functions.read_yaml_file_as_dictionary(
             "config.yaml"
         )  # TODO: Make this a bit more dynamic instead of hard coding.
 
@@ -128,7 +128,7 @@ class Configuration:
                     configuration_name, configuration_value = configuration_item
                     configuration_value_to_property_mapping: (
                         CONFIGURATION_VALUE_ENUM | None
-                    ) = safe_get_enum_value(
+                    ) = lib.enum_functions.safe_get_enum_value(
                         CONFIGURATION_VALUE_ENUM, configuration_name
                     )  # NOTE: This is to ensure that values in the configuration file are valid. These values are mapped to properties defined in the Configuration class.
                     if configuration_value_to_property_mapping is not None:
@@ -143,14 +143,14 @@ class Configuration:
 
     @classmethod
     def _set_env_file_values(cls) -> None:
-        env_file_values: dict[str, str | None] = get_env_file_values()
+        env_file_values: dict[str, str | None] = lib.environment_functions.get_env_file_values()
         credentials: str | None = env_file_values.get("CREDENTIALS")
         with cls._lock:
             if credentials is not None and credentials != "":
                 print("TODO: Handle credentials here")  # TODO: Handle credentials here
             for env_file_key, env_file_value in env_file_values.items():
                 env_value_to_property_mapping: ENVIRONMENT_VARIABLE_ENUM | None = (
-                    safe_get_enum_value(ENVIRONMENT_VARIABLE_ENUM, env_file_key)
+                    lib.enum_functions.safe_get_enum_value(ENVIRONMENT_VARIABLE_ENUM, env_file_key)
                 )
                 if env_value_to_property_mapping is not None:
                     cls._safe_set_class_value(

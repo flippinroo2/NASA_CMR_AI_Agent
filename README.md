@@ -4,11 +4,12 @@
 
 ## INSTALLATION
 
-> The first step is to clone this repository into a directory of your choosing.
+__#1 The first step is to clone this repository into a directory of your choosing.__
 
-The easiest way to install this application is to use the provided Docker configurations. However, if your local machine has Python and Ollama setup it is also pretty simple to install.
+The easiest way to install this application is to use the provided Docker configurations. However, if your local machine has Python and Ollama setup, it is also pretty simple to install.
 
-### INSTALLATION - LOCAL MACHINE
+<details>
+  <summary>INSTALLATION - LOCAL MACHINE</summary>
 
 1. Navigate to the `NASA_CMR_AI_Agent/project` directory.
 2. Run the `make` command.
@@ -16,15 +17,20 @@ The easiest way to install this application is to use the provided Docker config
 3. Activate the virtual environment created from above, and run the `NASA_CMR_AI_Agent/project/__main__.py__` file.
 
 >This will not provide access to the neo4j graph database. If you want to use the neo4j database, you will need to install it on your local machine as well.
+</details>
 
-### INSTALLATION - DOCKER
+<details>
+  <summary>INSTALLATION - DOCKER</summary>
 
 Inside the top-level `NASA_CMR_AI_Agent/project/.devcontainer` folder, you will see a `docker-compose.yml` file. This file is used to setup two Docker containers for this application.
 
 1. An Ubuntu container pre-configured with Python 3.12.7 and NVIDIA capabilities.
 2. A neo4j container configured to run a graph database for this application.
 
-### INSTALLATION - DEVCONTAINER
+</details>
+
+<details>
+  <summary>INSTALLATION - DEVCONTAINER</summary>
 
 This project comes included with a `NASA_CMR_AI_Agent/project/.devcontainer` folder, which should be recognized by most development environments.
 
@@ -39,6 +45,8 @@ Here are the instructions for devcontainer installation:
     - This will install Ollama within the container.
     - Create a virtual environment and install all necessary python packages.
     - Begin running the Ollama server inside the currently active terminal.
+
+</details>
 
 ## USAGE
 

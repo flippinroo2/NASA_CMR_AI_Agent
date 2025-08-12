@@ -1,7 +1,7 @@
-from enum import Enum
+import enum
 from typing import Type, TypeVar
 
-T_Enum = TypeVar("T_Enum", bound=Enum)
+T_Enum = TypeVar("T_Enum", bound=enum.Enum)
 
 
 def safe_get_enum_value(

@@ -1,17 +1,15 @@
-from contextlib import contextmanager
-from enum import StrEnum
-from io import TextIOWrapper
-from json import dumps
-from os import getcwd, listdir, makedirs
-from os.path import abspath, dirname, exists, isdir, isfile, join, splitext
+import contextlib
+import enum
+import json
+import os
 from typing import IO, Any, Generator, Literal
 
-from yaml import YAMLError, safe_load
+import yaml
 
-from lib.json_functions import format_json_string
+import lib.json_functions
 
 
-class FILE_EXTENSIONS(StrEnum):
+class FILE_EXTENSIONS(enum.StrEnum):
     CSV = ".csv"
     HTML = ".html"
     JSON = ".json"
@@ -33,9 +31,9 @@ def check_if_string_is_a_file(uri: str) -> bool:
     Returns:
         bool: Does the string represent a file? True if so, False if not.
     """
-    if isfile(uri):
+    if os.path.isfile(uri):
         return True
-    if isfile(join(getcwd(), uri)):
+    if os.path.isfile(os.path.join(os.getcwd(), uri)):
         print(
             f"The provided file string: {uri} was not a file, however, appending the string to the current working directory did return a valid file string... Returning True."
         )
@@ -79,9 +77,9 @@ def check_if_string_is_a_directory(directory_string: str) -> bool:
     Returns:
         bool: Does the concatenated string represent a file? True if so, False if not.
     """
-    if isdir(directory_string):
+    if os.path.isdir(directory_string):
         return True
-    if isdir(join(getcwd(), directory_string)):
+    if os.path.isdir(os.path.join(os.getcwd(), directory_string)):
         print(
             f"The provided directory string: {directory_string} was not a directory, however, appending the string to the current working directory did return a valid sub-directory... Returning True"
         )
@@ -108,9 +106,9 @@ def create_directory(directory_string: str) -> bool:
     Notes:
         A "FileExistsError" is possible in this function. It is purposely not caught, because of the initial exists() function check.
     """
-    if not exists(directory_string):
+    if not os.path.exists(directory_string):
         try:
-            makedirs(directory_string, exist_ok=True)
+            os.makedirs(directory_string, exist_ok=True)
         except FileNotFoundError as exception:
             print(f"create_directory() - FileNotFoundError: {exception}")
             raise exception
@@ -139,12 +137,12 @@ def get_file_extension_from_filepath(uri: str) -> str:
     Returns:
         str: The specified file's extension.
     """
-    file_extension: str = splitext(uri)[1]
+    file_extension: str = os.path.splitext(uri)[1]
     return file_extension
 
 
 def get_files_by_extension_in_directory(
-    directory_string: str = getcwd(),  # TODO: Make sure this is okay to call this function as a default argument.
+    directory_string: str = os.getcwd(),  # TODO: Make sure this is okay to call this function as a default argument.
     file_extension: list[str] | str | None = None,
 ) -> list[str]:
     """
@@ -160,7 +158,7 @@ def get_files_by_extension_in_directory(
     if file_extension is None:
         file_extension = ["txt"]  # NOTE: Setting the default file extension to "txt"
     file_list: list[str] = []
-    for file in listdir(directory_string):
+    for file in os.listdir(directory_string):
         full_file_path: str = f"{directory_string}/{file}"
         if isinstance(file_extension, list):
             for extension in file_extension:
@@ -184,13 +182,13 @@ def get_parent_directory_name(directory_string: str, depth_upwards: int = 1) -> 
         str: The name of the parent directory.
     """
     # NOTE: This function feels a little sloppy, and could probably be refactored to use recursion?
-    return_directory_name: str = abspath(directory_string)
+    return_directory_name: str = os.path.abspath(directory_string)
     for _ in range(depth_upwards):
-        return_directory_name = dirname(return_directory_name)
+        return_directory_name = os.path.dirname(return_directory_name)
     return return_directory_name
 
 
-@contextmanager
+@contextlib.contextmanager
 def open_file(
     uri: str,
     mode: Literal[
@@ -255,7 +253,7 @@ def open_file(
     except MemoryError as exception:
         print(f"Memory error: {exception}", exception)
         raise exception
-    except YAMLError as exception:
+    except yaml.YAMLError as exception:
         print(f"YAML error: {exception}", exception)
     except Exception as exception:
         print(f"Error opening file: {uri} | mode: {mode}")
@@ -296,7 +294,7 @@ def read_yaml_file_as_dictionary(yaml_filepath: str) -> dict[str, Any] | None:
     with open_file(yaml_filepath, "r") as file_content:
         if file_content is not None:
             try:
-                yaml_file = safe_load(
+                yaml_file = yaml.safe_load(
                     file_content.read()
                 )  # NOTE: It's important to call ".read()" here, or it could cause an error with the file closing too early.
                 return yaml_file
@@ -321,7 +319,7 @@ def write_dictionary_to_file(
     directory_check: bool = check_if_string_is_a_directory(parent_directory)
     if not directory_check:
         create_directory(parent_directory)
-    formatted_string: str = dumps(
+    formatted_string: str = json.dumps(
         obj=dictionary_to_write, indent=2, sort_keys=True
     )  # TODO: Fix this so that we don't perform the formatting twice... Once here and once in "write_stirng_to_file()"
     return write_string_to_file(uri=uri, text_to_write=formatted_string)
@@ -345,7 +343,7 @@ def write_string_to_file(uri: str, text_to_write: str | None) -> IO[Any] | None:
             create_directory(parent_directory)
         _file_extension: str = get_file_extension_from_filepath(uri)
         if _file_extension == FILE_EXTENSIONS.JSON.value:
-            text_to_write = format_json_string(text_to_write)
+            text_to_write = lib.json_functions.format_json_string(text_to_write)
         with open_file(uri, "w") as file_content:
             if file_content is not None:
                 file_content.write(text_to_write)
